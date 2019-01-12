@@ -1,6 +1,7 @@
-crowd-size: 20
+crowd-size: 1
 max-visits: 10
 pulse-resolution: 5
+pulse-resolution-error: 2
 meters-to-unit: 10
 vel: 1.4
 vel-error: 1.0
