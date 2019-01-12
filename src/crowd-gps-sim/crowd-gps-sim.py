@@ -43,14 +43,15 @@ def load(path):
     pulse_resolution = int(yaml_load["pulse-resolution"])
     pulse_resolution_error = int(yaml_load["pulse-resolution-error"])
     m_to_unit = float(yaml_load["meters-to-unit"])
+    location_error = float(yaml_load["location-error"])
     avg_vel = float(yaml_load["vel"])
     vel_error = float(yaml_load["vel-error"])
 
-    return (points_start, points_interest, crowd_size, max_visits, pulse_resolution, pulse_resolution_error, m_to_unit, avg_vel, vel_error)
+    return (points_start, points_interest, crowd_size, max_visits, pulse_resolution, pulse_resolution_error, m_to_unit, location_error, avg_vel, vel_error)
 
 
 (points_start, points_interest, crowd_size, max_visits,
- pulse_resolution, pulse_resolution_error, m_to_unit, avg_vel, vel_error) = load("settings.yaml")
+ pulse_resolution, pulse_resolution_error, m_to_unit, location_error, avg_vel, vel_error) = load("settings.yaml")
 
 print(points_start)
 print(points_interest)
@@ -81,13 +82,18 @@ for i in range(crowd_size):
     for visit_index in to_visit:
         previous_point = points_interest[visit_index - 1]
         target_point = points_interest[visit_index]
-        target_xy = (target_point[0], target_point[1])
+
+        x_error = random.uniform(-location_error, location_error)
+        y_error = random.uniform(-location_error, location_error)
+
+        target_xy = (target_point[0] + x_error, target_point[1] + y_error)
         previous_xy = (previous_point[0], previous_point[1])
 
         pulse_count = pulse_resolution + \
             random.randrange(-pulse_resolution_error,
                              pulse_resolution_error)
 
+        # Interpolate across the path for pulse events
         for pulse_index in range(pulse_count):
             t = random.uniform(0, 1)
             point = interpolate(previous_xy, target_xy, t)
@@ -96,27 +102,29 @@ for i in range(crowd_size):
         pulse_events.append(target_xy)
 
     # Walk route
-    route_stringer = []
-    route_stringer.append("x,y,time,velocity,distance")
+    route_stringer = "x,y,time,velocity,distance\n"
     total_traverse_time = 0
     total_traverse_distance = 0
 
     for pulse_event_index in range(len(pulse_events)):
         current_point = pulse_events[pulse_event_index]
         distance = 0
-        time_to_travese = 0
+        time_to_traverse = 0
         calculated_vel = 0
 
+        # Calculate vel from distance
         if pulse_event_index > 0:
             previous_point = pulse_events[pulse_event_index - 1]
             distance = point_distance(
                 current_point, previous_point) * m_to_unit
             calculated_vel = avg_vel + random.uniform(-vel_error, vel_error)
-            time_to_travese = distance / calculated_vel
+            time_to_traverse = distance / calculated_vel
 
-        total_traverse_time += time_to_travese
+        # Trip stats
+        total_traverse_time += time_to_traverse
         total_traverse_distance += distance
 
+        # Create the event string
         str_x = str(current_point[0])
         str_y = str(current_point[1])
         str_time = str(total_traverse_time)
@@ -125,11 +133,9 @@ for i in range(crowd_size):
 
         string_build = str_x + "," + str_y + "," + \
             str_time + "," + str_vel + "," + str_distance
-        route_stringer.append(string_build)
+        route_stringer += string_build + "\n"
 
+    # Write
+    f = open("output-crowd-sim.csv", "w")
+    f.write(route_stringer)
     print(route_stringer)
-
-    # Simulate pulse
-    # max_interpolations = random.randrange(pulse_resolution)
-##
-    # print(interpolate((0, 0), (8, 4), 0.3))
