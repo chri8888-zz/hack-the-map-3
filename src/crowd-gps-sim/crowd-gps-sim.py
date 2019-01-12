@@ -26,8 +26,8 @@ def point_distance(start, end):
 
 
 def location_drift(error):
-    drift_x = random.uniform(-location_error, location_error)
-    drift_y = random.uniform(-location_error, location_error)
+    drift_x = random.uniform(-error, error)
+    drift_y = random.uniform(-error, error)
     return (drift_x, drift_y)
 
 
@@ -72,7 +72,11 @@ def load(path):
     for point in yaml_load["points-of-interest"]:
         x = float(point["x"])
         y = float(point["y"])
-        points_interest.append((x, y))
+        name = point["name"]
+        radius = float(point["radius"])
+        wait_min = float(point["wait-min"])
+        wait_max = float(point["wait-max"])
+        points_interest.append((x, y, wait_min, wait_max, radius, name))
 
     # Crowd Size + max visits
     crowd_size = int(yaml_load["crowd-size"])
@@ -126,19 +130,35 @@ for id in range(crowd_size):
     for visit_index in to_visit:
         target_point = points_interest[visit_index]
 
+        # GPS sim
         target_xy = tuple_addition(
             target_point, location_drift(location_error))
 
+        # Generate the number of GPS syncs
         pulse_count = pulse_resolution + \
             random.randrange(-pulse_resolution_error,
                              pulse_resolution_error)
 
         # Interpolate across the path for pulse events
         for pulse_index in range(pulse_count):
-            t = random.uniform(0, 1)
-            point = interpolate(previous_point, target_xy, t)
+            point = interpolate(previous_point, target_xy,
+                                random.uniform(0, 1))
             pulse_events.append(tuple_addition(
                 point, location_drift(location_error)))
+
+        # Simulate wait
+        wait_min = target_point[2]
+        wait_max = target_point[3]
+        wait_loops = random.randrange(wait_min, wait_max)
+        for i in range(wait_loops):
+            # Set point in radius
+            radius = target_point[4]
+            wait_offset = location_drift(radius)
+            wait_point = tuple_addition(
+                target_xy, wait_offset)
+            print(wait_offset, radius)
+            pulse_events.append(tuple_addition(
+                wait_point, location_drift(location_error)))
 
         previous_point = target_xy
         pulse_events.append(target_xy)

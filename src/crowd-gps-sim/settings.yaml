@@ -1,9 +1,9 @@
-crowd-size: 2
+crowd-size: 20
 max-visits: 4
-pulse-resolution: 40
-pulse-resolution-error: 10
+pulse-resolution: 15
+pulse-resolution-error: 5
 meters-to-unit: 10
-location-error: 0.1
+location-error: 0.05
 start-time-range: 50
 vel: 1.4
 vel-error: 1.0
@@ -23,7 +23,7 @@ points-of-interest:
     name: John Peel Stage
     x: 0
     y: 10
-    radius: 0.5
+    radius: 0.75
     waits: 20
     wait-min: 5 
     wait-max: 50
