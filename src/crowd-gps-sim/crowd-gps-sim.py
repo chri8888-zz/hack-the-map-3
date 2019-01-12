@@ -22,6 +22,28 @@ def point_distance(start, end):
     return math.sqrt(diff_x + diff_y)
 
 
+def export(path, events):
+    route_stringer = "id,x,y,time,velocity,distance\n"
+    for event in events:
+        # Event to string
+        (id, str_x, str_y, str_time, str_vel, str_distance) = event
+        str_id = "id_" + str(id)
+        str_x = str(str_x)
+        str_y = str(str_y)
+        str_time = str(str_time)
+        str_vel = str(str_vel)
+        str_distance = str(str_distance)
+
+        string_build = str_id + "," + str_x + "," + str_y + "," + \
+            str_time + "," + str_vel + "," + str_distance
+        route_stringer += string_build + "\n"
+
+    file = open(path, "w")
+    file.write(route_stringer)
+
+    print(events)
+
+
 def load(path):
     # Open yaml
     stream = codecs.open(path, "r", encoding="utf-8")
@@ -44,14 +66,15 @@ def load(path):
     pulse_resolution_error = int(yaml_load["pulse-resolution-error"])
     m_to_unit = float(yaml_load["meters-to-unit"])
     location_error = float(yaml_load["location-error"])
+    start_time_range = float(yaml_load["start-time-range"])
     avg_vel = float(yaml_load["vel"])
     vel_error = float(yaml_load["vel-error"])
 
-    return (points_start, points_interest, crowd_size, max_visits, pulse_resolution, pulse_resolution_error, m_to_unit, location_error, avg_vel, vel_error)
+    return (points_start, points_interest, crowd_size, max_visits, pulse_resolution, pulse_resolution_error, m_to_unit, location_error, start_time_range, avg_vel, vel_error)
 
 
 (points_start, points_interest, crowd_size, max_visits,
- pulse_resolution, pulse_resolution_error, m_to_unit, location_error, avg_vel, vel_error) = load("settings.yaml")
+ pulse_resolution, pulse_resolution_error, m_to_unit, location_error, start_time_range, avg_vel, vel_error) = load("settings.yaml")
 
 print(points_start)
 print(points_interest)
@@ -59,12 +82,12 @@ print(crowd_size)
 
 print("Start simulation")
 
-user_count = 0
+id = -1
+device_pulse_events = []
 
 # Process
 for i in range(crowd_size):
-    print("[ user " + str(user_count) + " ] ")
-    user_count += 1
+    id += 1
 
     visits = random.randrange(1, max_visits)
     to_visit = []
@@ -75,10 +98,13 @@ for i in range(crowd_size):
 
     # Choose starting location
     start_point = points_start[random.randrange(len(points_start))]
+    x_error = random.uniform(-location_error, location_error)
+    y_error = random.uniform(-location_error, location_error)
+    start_point_xy = (start_point[0] + x_error, start_point[1] + y_error)
 
     # Interpolate pulse events
     pulse_events = []
-    pulse_events.append(start_point)
+    pulse_events.append(start_point_xy)
     for visit_index in to_visit:
         previous_point = points_interest[visit_index - 1]
         target_point = points_interest[visit_index]
@@ -102,8 +128,7 @@ for i in range(crowd_size):
         pulse_events.append(target_xy)
 
     # Walk route
-    route_stringer = "x,y,time,velocity,distance\n"
-    total_traverse_time = 0
+    total_traverse_time = random.uniform(0, start_time_range)
     total_traverse_distance = 0
 
     for pulse_event_index in range(len(pulse_events)):
@@ -124,18 +149,10 @@ for i in range(crowd_size):
         total_traverse_time += time_to_traverse
         total_traverse_distance += distance
 
-        # Create the event string
-        str_x = str(current_point[0])
-        str_y = str(current_point[1])
-        str_time = str(total_traverse_time)
-        str_vel = str(calculated_vel)
-        str_distance = str(total_traverse_distance)
+        # Add to the list of events
+        device_pulse_events.append(
+            (id, current_point[0], current_point[1], total_traverse_time, calculated_vel, total_traverse_distance))
 
-        string_build = str_x + "," + str_y + "," + \
-            str_time + "," + str_vel + "," + str_distance
-        route_stringer += string_build + "\n"
-
-    # Write
-    f = open("output-crowd-sim.csv", "w")
-    f.write(route_stringer)
-    print(route_stringer)
+# Export sorted events to CSV
+export("output-crowd-sim.csv", sorted(device_pulse_events,
+                                      key=lambda time_stamp: time_stamp[3]))

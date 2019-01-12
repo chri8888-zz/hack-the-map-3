@@ -1,9 +1,10 @@
-crowd-size: 1
+crowd-size: 6
 max-visits: 10
-pulse-resolution: 5
-pulse-resolution-error: 2
+pulse-resolution: 7
+pulse-resolution-error: 3
 meters-to-unit: 10
 location-error: 0.5
+start-time-range: 100
 vel: 1.4
 vel-error: 1.0
 starting-locations:
