@@ -1,0 +1,32 @@
+crowd-size: 20
+max-visits: 10
+pulse-resolution: 5
+meters-to-unit: 10
+vel: 1.4
+vel-error: 1.0
+starting-locations:
+  -
+    x: 0
+    y: 0
+  - 
+    x: 10
+    y: 10
+
+points-of-interest:
+  -
+    name: point A
+    x: 5
+    y: 5
+  -
+    name: point B
+    x: 2
+    y: 7
+  -
+    name: point C
+    x: 7
+    y: 2
+  -
+    name: point D
+    x: 9
+    y: 7
+
