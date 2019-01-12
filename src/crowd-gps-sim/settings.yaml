@@ -4,9 +4,15 @@ pulse-resolution: 7
 pulse-resolution-error: 3
 meters-to-unit: 10
 location-error: 0.5
-start-time-range: 100
+start-time-range: 5000
 vel: 1.4
 vel-error: 1.0
+start-date-year: 2016
+start-date-month: 6
+start-date-day: 22
+start-date-hour: 10
+start-date-minute: 0
+start-date-second: 0
 starting-locations:
   -
     x: 0

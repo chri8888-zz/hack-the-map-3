@@ -3,6 +3,16 @@ import codecs
 import yaml
 import random
 import math
+import time
+from datetime import datetime, date, time, timedelta
+
+
+def getTime(seconds):
+    sec = timedelta(seconds)
+    d = datetime(1, 1, 1) + sec
+
+    print("DAYS:HOURS:MIN:SEC")
+    print("%d:%d:%d:%d" % (d.day-1, d.hour, d.minute, d.second))
 
 
 def interpolate(start, end, t):
@@ -27,7 +37,7 @@ def export(path, events):
     for event in events:
         # Event to string
         (id, str_x, str_y, str_time, str_vel, str_distance) = event
-        str_id = "id_" + str(id)
+        str_id = str(id)
         str_x = str(str_x)
         str_y = str(str_y)
         str_time = str(str_time)
@@ -69,12 +79,19 @@ def load(path):
     start_time_range = float(yaml_load["start-time-range"])
     avg_vel = float(yaml_load["vel"])
     vel_error = float(yaml_load["vel-error"])
+    start_date_time = datetime(
+        int(yaml_load["start-date-year"]),
+        int(yaml_load["start-date-month"]),
+        int(yaml_load["start-date-day"]),
+        int(yaml_load["start-date-hour"]),
+        int(yaml_load["start-date-minute"]),
+        int(yaml_load["start-date-second"]))
 
-    return (points_start, points_interest, crowd_size, max_visits, pulse_resolution, pulse_resolution_error, m_to_unit, location_error, start_time_range, avg_vel, vel_error)
+    return (points_start, points_interest, crowd_size, max_visits, pulse_resolution, pulse_resolution_error, m_to_unit, location_error, start_time_range, avg_vel, vel_error, start_date_time)
 
 
 (points_start, points_interest, crowd_size, max_visits,
- pulse_resolution, pulse_resolution_error, m_to_unit, location_error, start_time_range, avg_vel, vel_error) = load("settings.yaml")
+ pulse_resolution, pulse_resolution_error, m_to_unit, location_error, start_time_range, avg_vel, vel_error, start_date_time) = load("settings.yaml")
 
 print(points_start)
 print(points_interest)
@@ -128,7 +145,8 @@ for i in range(crowd_size):
         pulse_events.append(target_xy)
 
     # Walk route
-    total_traverse_time = random.uniform(0, start_time_range)
+    total_traverse_time = start_date_time + timedelta(
+        seconds=random.uniform(0, start_time_range))
     total_traverse_distance = 0
 
     for pulse_event_index in range(len(pulse_events)):
@@ -146,13 +164,19 @@ for i in range(crowd_size):
             time_to_traverse = distance / calculated_vel
 
         # Trip stats
-        total_traverse_time += time_to_traverse
+        total_traverse_time += timedelta(seconds=time_to_traverse)
         total_traverse_distance += distance
 
         # Add to the list of events
         device_pulse_events.append(
             (id, current_point[0], current_point[1], total_traverse_time, calculated_vel, total_traverse_distance))
 
+print("Start export")
+
 # Export sorted events to CSV
 export("output-crowd-sim.csv", sorted(device_pulse_events,
                                       key=lambda time_stamp: time_stamp[3]))
+
+d = datetime(2016, 6, 22, 0, 10, 0)
+t = d + timedelta(seconds=2100)
+print(str(t))
