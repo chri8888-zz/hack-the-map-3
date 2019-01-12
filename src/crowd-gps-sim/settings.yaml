@@ -15,39 +15,29 @@ start-date-minute: 0
 start-date-second: 0
 starting-locations:
   -
-    x: 0
-    y: 0
-  - 
-    x: 10
-    y: 10
+    x: -288443.7429
+    y: 6649452.477
 
 points-of-interest:
   -
-    name: point A
-    x: 5
-    y: 5
+    name: John Peel Stage
+    x: -288443.7429
+    y: 6649452.477
   -
-    name: point B
-    x: 2
-    y: 7
+    name: Pyramid Stage
+    x: -287899.3211
+    y: 6648847.965
   -
-    name: point C
-    x: 7
-    y: 2
+    name: Acoustic Stage
+    x: -286909.9994
+    y: 6648544.427
   -
-    name: point D
-    x: 9
-    y: 7
+    name: Theatre Astro Labe
+    x: -287069.2061
+    y: 6648189.415
   -
-    name: point D
-    x: 3
-    y: 7
-  -
-    name: point D
-    x: 5
-    y: 9
-  -
-    name: point D
-    x: 1
-    y: 6
+    name: Circus Big Top
+    x: -287374.2867
+    y: 6648140.268
+
 
