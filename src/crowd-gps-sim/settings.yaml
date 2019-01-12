@@ -1,4 +1,4 @@
-crowd-size: 1
+crowd-size: 2000000
 max-visits: 10
 pulse-resolution: 5
 pulse-resolution-error: 2

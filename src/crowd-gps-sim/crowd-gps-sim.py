@@ -58,11 +58,12 @@ print(crowd_size)
 
 print("Start simulation")
 
-user = 0
+user_count = 0
 
 # Process
 for i in range(crowd_size):
-    print("[ user " + str(user) + " ] ")
+    print("[ user " + str(user_count) + " ] ")
+    user_count += 1
 
     visits = random.randrange(1, max_visits)
     to_visit = []
