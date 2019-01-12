@@ -16,38 +16,48 @@ using Esri.ArcGISRuntime.UI;
 
 namespace festiflo_logistics_controller
 {
-    /// <summary>
-    /// Provides map data to an application
-    /// </summary>
-    public class MapViewModel : INotifyPropertyChanged
+  /// <summary>
+  /// Provides map data to an application
+  /// </summary>
+  public class MapViewModel : INotifyPropertyChanged
+  {
+    private static string _dataUrl = "https://sampleserver6.arcgisonline.com/arcgis/rest/services/Earthquakes_Since1970/FeatureServer/0";
+
+    public MapViewModel()
     {
-        public MapViewModel()
-        {
-
-        }
-
-        private Map _map = new Map(Basemap.CreateStreets());
-
-        /// <summary>
-        /// Gets or sets the map
-        /// </summary>
-        public Map Map
-        {
-            get { return _map; }
-            set { _map = value; OnPropertyChanged(); }
-        }
-
-        /// <summary>
-        /// Raises the <see cref="MapViewModel.PropertyChanged" /> event
-        /// </summary>
-        /// <param name="propertyName">The name of the property that has changed</param>
-        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            var propertyChangedHandler = PropertyChanged;
-            if (propertyChangedHandler != null)
-                propertyChangedHandler(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
+      LoadData();
     }
+
+    private Map _map = new Map(Basemap.CreateStreets());
+
+    /// <summary>
+    /// Gets or sets the map
+    /// </summary>
+    public Map Map
+    {
+      get { return _map; }
+      set { _map = value; OnPropertyChanged(); }
+    }
+
+    /// <summary>
+    /// Raises the <see cref="MapViewModel.PropertyChanged" /> event
+    /// </summary>
+    /// <param name="propertyName">The name of the property that has changed</param>
+    protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+    {
+      var propertyChangedHandler = PropertyChanged;
+      if (propertyChangedHandler != null)
+        propertyChangedHandler(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+    public event PropertyChangedEventHandler PropertyChanged;
+
+
+    private async void LoadData()
+    {
+      FeatureLayer _dataLayer = new FeatureLayer(new Uri(_dataUrl));
+      await _dataLayer.LoadAsync();
+      _map.OperationalLayers.Add(_dataLayer);
+    }
+  }
 }
