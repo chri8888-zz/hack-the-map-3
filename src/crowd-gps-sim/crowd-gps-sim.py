@@ -6,15 +6,6 @@ import math
 import time
 from datetime import datetime, date, time, timedelta
 
-
-def getTime(seconds):
-    sec = timedelta(seconds)
-    d = datetime(1, 1, 1) + sec
-
-    print("DAYS:HOURS:MIN:SEC")
-    print("%d:%d:%d:%d" % (d.day-1, d.hour, d.minute, d.second))
-
-
 def interpolate(start, end, t):
     (a_x, a_y) = start
     (b_x, b_y) = end
@@ -51,7 +42,6 @@ def export(path, events):
     file = open(path, "w")
     file.write(route_stringer)
 
-    print(events)
 
 
 def load(path):
@@ -122,8 +112,11 @@ for i in range(crowd_size):
     # Interpolate pulse events
     pulse_events = []
     pulse_events.append(start_point_xy)
+    previous_point = start_point_xy
     for visit_index in to_visit:
-        previous_point = points_interest[visit_index - 1]
+        if visit_index != 0:
+            previous_point = points_interest[visit_index - 1]
+        
         target_point = points_interest[visit_index]
 
         x_error = random.uniform(-location_error, location_error)
