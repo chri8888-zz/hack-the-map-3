@@ -1,10 +1,10 @@
-crowd-size: 6
+crowd-size: 600
 max-visits: 10
-pulse-resolution: 7
+pulse-resolution: 50
 pulse-resolution-error: 3
 meters-to-unit: 10
 location-error: 0.5
-start-time-range: 5000
+start-time-range: 50
 vel: 1.4
 vel-error: 1.0
 start-date-year: 2016
@@ -39,8 +39,5 @@ points-of-interest:
     name: Circus Big Top
     x: -287374.2867
     y: 6648140.268
-  -
-    name: The Other Stage
-    x: -288239.547
-    y: 6648200.249
+
 
