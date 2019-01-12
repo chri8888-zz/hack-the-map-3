@@ -13,6 +13,8 @@ using Esri.ArcGISRuntime.Security;
 using Esri.ArcGISRuntime.Symbology;
 using Esri.ArcGISRuntime.Tasks;
 using Esri.ArcGISRuntime.UI;
+using HeatMapRendererJson;
+using System.Windows.Media;
 
 namespace festiflo_logistics_controller
 {
@@ -57,6 +59,28 @@ namespace festiflo_logistics_controller
     {
       FeatureLayer _dataLayer = new FeatureLayer(new Uri(_dataUrl));
       await _dataLayer.LoadAsync();
+
+      // Create a new HeatMapRenderer with info provided by the user.
+      HeatMapRenderer heatMapRendererInfo = new HeatMapRenderer
+      {
+        BlurRadius = 14,
+        MinPixelIntensity = 0,
+        MaxPixelIntensity = 100,
+      };
+
+      // Add the chosen color stops (plus transparent for empty areas).
+      heatMapRendererInfo.AddColorStop(0.0, Colors.Transparent);
+      heatMapRendererInfo.AddColorStop(0.10, Colors.Red);
+      heatMapRendererInfo.AddColorStop(1.0, Colors.Yellow);
+
+      // Get the JSON representation of the renderer class.
+      string heatMapJson = heatMapRendererInfo.ToJson();
+
+      // Use the static Renderer.FromJson method to create a new renderer from the JSON string.
+      var heatMapRenderer = Renderer.FromJson(heatMapJson);
+
+      // Apply the renderer to a point layer in the map.
+      _dataLayer.Renderer = heatMapRenderer;
       _map.OperationalLayers.Add(_dataLayer);
     }
   }
