@@ -23,14 +23,14 @@ namespace festiflo_logistics_controller
   /// </summary>
   public class MapViewModel : INotifyPropertyChanged
   {
-    private static string _dataUrl = "https://sampleserver6.arcgisonline.com/arcgis/rest/services/Earthquakes_Since1970/FeatureServer/0";
+    private static string _dataUrl = "http://cardiffportal.esri.com/server/rest/services/Hosted/FestivalTestPolys/FeatureServer/0";
 
     public MapViewModel()
     {
-      LoadData();
+      LoadHeatMap();
     }
 
-    private Map _map = new Map(Basemap.CreateStreets());
+    private Map _map = new Map(BasemapType.ImageryWithLabels, 51.154, -2.581, 16);
 
     /// <summary>
     /// Gets or sets the map
@@ -55,7 +55,7 @@ namespace festiflo_logistics_controller
     public event PropertyChangedEventHandler PropertyChanged;
 
 
-    private async void LoadData()
+    private async void LoadHeatMap()
     {
       FeatureLayer _dataLayer = new FeatureLayer(new Uri(_dataUrl));
       await _dataLayer.LoadAsync();
