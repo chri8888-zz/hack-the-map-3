@@ -1,9 +1,9 @@
-crowd-size: 60
-max-visits: 10
-pulse-resolution: 50
-pulse-resolution-error: 3
+crowd-size: 2
+max-visits: 4
+pulse-resolution: 40
+pulse-resolution-error: 10
 meters-to-unit: 10
-location-error: 0.5
+location-error: 0.1
 start-time-range: 50
 vel: 1.4
 vel-error: 1.0
@@ -15,29 +15,31 @@ start-date-minute: 0
 start-date-second: 0
 starting-locations:
   -
-    x: -288443.7429
-    y: 6649452.477
+    x: 0
+    y: 0
 
 points-of-interest:
   -
     name: John Peel Stage
-    x: -288443.7429
-    y: 6649452.477
+    x: 0
+    y: 10
+    radius: 0.5
+    waits: 20
+    wait-min: 5 
+    wait-max: 50
   -
     name: Pyramid Stage
-    x: -287899.3211
-    y: 6648847.965
+    x: 10
+    y: 10
+    radius: 1
+    wait-min: 10
+    wait-max: 100
   -
     name: Acoustic Stage
-    x: -286909.9994
-    y: 6648544.427
-  -
-    name: Theatre Astro Labe
-    x: -287069.2061
-    y: 6648189.415
-  -
-    name: Circus Big Top
-    x: -287374.2867
-    y: 6648140.268
+    x: 10
+    y: 0
+    radius: 0.5
+    wait-min: 15
+    wait-max: 20
 
 

@@ -5,6 +5,8 @@ import random
 import math
 import time
 from datetime import datetime, date, time, timedelta
+from random import shuffle
+
 
 def interpolate(start, end, t):
     (a_x, a_y) = start
@@ -21,6 +23,16 @@ def point_distance(start, end):
     diff_y = (b_y - a_y) * (b_y - a_y)
 
     return math.sqrt(diff_x + diff_y)
+
+
+def location_drift(error):
+    drift_x = random.uniform(-location_error, location_error)
+    drift_y = random.uniform(-location_error, location_error)
+    return (drift_x, drift_y)
+
+
+def tuple_addition(left, right):
+    return (left[0] + right[0], left[1] + right[1])
 
 
 def export(path, events):
@@ -43,7 +55,6 @@ def export(path, events):
     file.write(route_stringer)
 
 
-
 def load(path):
     # Open yaml
     stream = codecs.open(path, "r", encoding="utf-8")
@@ -52,12 +63,16 @@ def load(path):
     # Start points
     points_start = []
     for point in yaml_load["starting-locations"]:
-        points_start.append((point["x"], point["y"]))
+        x = float(point["x"])
+        y = float(point["y"])
+        points_start.append((x, y))
 
     # Points of interest
     points_interest = []
     for point in yaml_load["points-of-interest"]:
-        points_interest.append((point["x"], point["y"], point["name"]))
+        x = float(point["x"])
+        y = float(point["y"])
+        points_interest.append((x, y))
 
     # Crowd Size + max visits
     crowd_size = int(yaml_load["crowd-size"])
@@ -83,49 +98,36 @@ def load(path):
 (points_start, points_interest, crowd_size, max_visits,
  pulse_resolution, pulse_resolution_error, m_to_unit, location_error, start_time_range, avg_vel, vel_error, start_date_time) = load("settings.yaml")
 
-print(points_start)
-print(points_interest)
-print(crowd_size)
+# print(points_start)
+# print(points_interest)
+# print(crowd_size)
 
 print("Start simulation")
 
-id = -1
 device_pulse_events = []
 
 # Process
-for i in range(crowd_size):
-    id += 1
-
-    visits = random.randrange(1, max_visits)
+for id in range(crowd_size):
     to_visit = []
 
-    # Build the visit stack
-    for j in range(visits):
-        to_visit.append(random.randrange(0, len(points_interest)))
+    # Shuffle the visit stack
+    to_visit = [i for i in range(len(points_interest))]
+    shuffle(to_visit)
 
     # Choose starting location
     start_point = points_start[random.randrange(len(points_start))]
-    x_error = random.uniform(-location_error, location_error)
-    y_error = random.uniform(-location_error, location_error)
-    start_point_xy = (start_point[0] + x_error, start_point[1] + y_error)
+    start_point_xy = tuple_addition(
+        start_point, location_drift(location_error))
 
     # Interpolate pulse events
     pulse_events = []
     pulse_events.append(start_point_xy)
     previous_point = start_point_xy
     for visit_index in to_visit:
-        if visit_index != 0:
-            previous_point = points_interest[visit_index - 1]
-        
         target_point = points_interest[visit_index]
 
-        target_x_error = random.uniform(-location_error, location_error)
-        target_y_error = random.uniform(-location_error, location_error)
-        previous_x_error = random.uniform(-location_error, location_error)
-        previous_y_error = random.uniform(-location_error, location_error)
-
-        target_xy = (target_point[0] + target_x_error, target_point[1] + target_y_error)
-        previous_xy = (previous_point[0] + previous_x_error, previous_point[1] + previous_y_error)
+        target_xy = tuple_addition(
+            target_point, location_drift(location_error))
 
         pulse_count = pulse_resolution + \
             random.randrange(-pulse_resolution_error,
@@ -134,9 +136,11 @@ for i in range(crowd_size):
         # Interpolate across the path for pulse events
         for pulse_index in range(pulse_count):
             t = random.uniform(0, 1)
-            point = interpolate(previous_xy, target_xy, t)
-            pulse_events.append(point)
+            point = interpolate(previous_point, target_xy, t)
+            pulse_events.append(tuple_addition(
+                point, location_drift(location_error)))
 
+        previous_point = target_xy
         pulse_events.append(target_xy)
 
     # Walk route
@@ -171,7 +175,4 @@ print("Start export")
 # Export sorted events to CSV
 export("output-crowd-sim.csv", sorted(device_pulse_events,
                                       key=lambda time_stamp: time_stamp[3]))
-
-d = datetime(2016, 6, 22, 0, 10, 0)
-t = d + timedelta(seconds=2100)
-print(str(t))
+print("Complete")
