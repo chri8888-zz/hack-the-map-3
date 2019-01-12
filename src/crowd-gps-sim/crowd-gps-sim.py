@@ -119,11 +119,13 @@ for i in range(crowd_size):
         
         target_point = points_interest[visit_index]
 
-        x_error = random.uniform(-location_error, location_error)
-        y_error = random.uniform(-location_error, location_error)
+        target_x_error = random.uniform(-location_error, location_error)
+        target_y_error = random.uniform(-location_error, location_error)
+        previous_x_error = random.uniform(-location_error, location_error)
+        previous_y_error = random.uniform(-location_error, location_error)
 
-        target_xy = (target_point[0] + x_error, target_point[1] + y_error)
-        previous_xy = (previous_point[0], previous_point[1])
+        target_xy = (target_point[0] + target_x_error, target_point[1] + target_y_error)
+        previous_xy = (previous_point[0] + previous_x_error, previous_point[1] + previous_y_error)
 
         pulse_count = pulse_resolution + \
             random.randrange(-pulse_resolution_error,
