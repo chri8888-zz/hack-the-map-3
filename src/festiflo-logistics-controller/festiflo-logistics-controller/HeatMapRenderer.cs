@@ -12,6 +12,8 @@ using System;
 using System.Collections.Generic;
 using System.Windows.Media;
 
+// From https://community.esri.com/community/developers/native-app-developers/arcgis-runtime-sdk-for-net/blog/2018/03/29/heat-map-renderer-map-it-like-its-hot
+
 namespace HeatMapRendererJson
 {
   /// <summary>
