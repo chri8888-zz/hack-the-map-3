@@ -1,9 +1,9 @@
-crowd-size: 20
-max-visits: 4
-pulse-resolution: 15
+crowd-size: 2000
+max-visits: 20
+pulse-resolution: 25
 pulse-resolution-error: 5
-meters-to-unit: 10
-location-error: 0.05
+meters-to-unit: 1
+location-error: 20
 start-time-range: 50
 vel: 1.4
 vel-error: 1.0
@@ -13,33 +13,15 @@ start-date-day: 22
 start-date-hour: 10
 start-date-minute: 0
 start-date-second: 0
-starting-locations:
-  -
-    x: 0
-    y: 0
-
+wait-min: 10 
+wait-max: 200
+starting-locations: 
+  - Entrances
 points-of-interest:
-  -
-    name: John Peel Stage
-    x: 0
-    y: 10
-    radius: 0.75
-    waits: 20
-    wait-min: 5 
-    wait-max: 50
-  -
-    name: Pyramid Stage
-    x: 10
-    y: 10
-    radius: 1
-    wait-min: 10
-    wait-max: 100
-  -
-    name: Acoustic Stage
-    x: 10
-    y: 0
-    radius: 0.5
-    wait-min: 15
-    wait-max: 20
+  - Stages
+  - Stages
+  - Stages
+  - Stages
+  - Toilets
 
 

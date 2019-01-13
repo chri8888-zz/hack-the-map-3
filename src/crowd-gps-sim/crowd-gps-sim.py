@@ -6,6 +6,7 @@ import math
 import time
 from datetime import datetime, date, time, timedelta
 from random import shuffle
+import csv
 
 
 def interpolate(start, end, t):
@@ -35,6 +36,21 @@ def tuple_addition(left, right):
     return (left[0] + right[0], left[1] + right[1])
 
 
+def load_points_from_csv(name):
+    path = "./" + name + ".csv"
+    points = []
+    with open(path) as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            x = float(row["X"])
+            y = float(row["Y"])
+            radius = float(row["Radius"])
+            new_interset_point = (x, y, radius)
+            points.append(new_interset_point)
+
+    return points
+
+
 def export(path, events):
     route_stringer = "id,x,y,time,velocity,distance\n"
     for event in events:
@@ -60,23 +76,14 @@ def load(path):
     stream = codecs.open(path, "r", encoding="utf-8")
     yaml_load = yaml.load(stream.read())
 
-    # Start points
+    # Pointspoints_start
     points_start = []
-    for point in yaml_load["starting-locations"]:
-        x = float(point["x"])
-        y = float(point["y"])
-        points_start.append((x, y))
+    for file_name in yaml_load["starting-locations"]:
+        points_start += load_points_from_csv(file_name)
 
-    # Points of interest
     points_interest = []
-    for point in yaml_load["points-of-interest"]:
-        x = float(point["x"])
-        y = float(point["y"])
-        name = point["name"]
-        radius = float(point["radius"])
-        wait_min = float(point["wait-min"])
-        wait_max = float(point["wait-max"])
-        points_interest.append((x, y, wait_min, wait_max, radius, name))
+    for file_name in yaml_load["points-of-interest"]:
+        points_interest += load_points_from_csv(file_name)
 
     # Crowd Size + max visits
     crowd_size = int(yaml_load["crowd-size"])
@@ -88,6 +95,8 @@ def load(path):
     start_time_range = float(yaml_load["start-time-range"])
     avg_vel = float(yaml_load["vel"])
     vel_error = float(yaml_load["vel-error"])
+    wait_min = int(yaml_load["wait-min"])
+    wait_max = int(yaml_load["wait-max"])
     start_date_time = datetime(
         int(yaml_load["start-date-year"]),
         int(yaml_load["start-date-month"]),
@@ -96,11 +105,11 @@ def load(path):
         int(yaml_load["start-date-minute"]),
         int(yaml_load["start-date-second"]))
 
-    return (points_start, points_interest, crowd_size, max_visits, pulse_resolution, pulse_resolution_error, m_to_unit, location_error, start_time_range, avg_vel, vel_error, start_date_time)
+    return (points_start, points_interest, crowd_size, max_visits, pulse_resolution, pulse_resolution_error, m_to_unit, location_error, start_time_range, avg_vel, vel_error, start_date_time, wait_min, wait_max)
 
 
 (points_start, points_interest, crowd_size, max_visits,
- pulse_resolution, pulse_resolution_error, m_to_unit, location_error, start_time_range, avg_vel, vel_error, start_date_time) = load("settings.yaml")
+ pulse_resolution, pulse_resolution_error, m_to_unit, location_error, start_time_range, avg_vel, vel_error, start_date_time, wait_min, wait_max) = load("settings.yaml")
 
 # print(points_start)
 # print(points_interest)
@@ -117,6 +126,7 @@ for id in range(crowd_size):
     # Shuffle the visit stack
     to_visit = [i for i in range(len(points_interest))]
     shuffle(to_visit)
+    to_visit = to_visit[:(random.randrange(1, max_visits))]
 
     # Choose starting location
     start_point = points_start[random.randrange(len(points_start))]
@@ -147,16 +157,13 @@ for id in range(crowd_size):
                 point, location_drift(location_error)))
 
         # Simulate wait
-        wait_min = target_point[2]
-        wait_max = target_point[3]
         wait_loops = random.randrange(wait_min, wait_max)
         for i in range(wait_loops):
             # Set point in radius
-            radius = target_point[4]
+            radius = target_point[2]
             wait_offset = location_drift(radius)
             wait_point = tuple_addition(
                 target_xy, wait_offset)
-            print(wait_offset, radius)
             pulse_events.append(tuple_addition(
                 wait_point, location_drift(location_error)))
 
