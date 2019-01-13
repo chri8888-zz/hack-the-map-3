@@ -79,7 +79,7 @@ namespace festiflo_logistics_controller
         return null;
 
       var queryParams = new QueryParameters();
-      queryParams.WhereClause = "Name = \"John Peel Stage\"";
+      queryParams.WhereClause = "objectid > 0";
       var count = await table.QueryFeatureCountAsync(queryParams);
       var queryFeatureResults = await table.QueryFeaturesAsync(queryParams);
       var resultingFeature = queryFeatureResults.FirstOrDefault();

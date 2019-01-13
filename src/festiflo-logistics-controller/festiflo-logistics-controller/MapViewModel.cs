@@ -49,8 +49,14 @@ namespace festiflo_logistics_controller
     public Esri.ArcGISRuntime.Geometry.Geometry JohnPeelGeometry
     {
       get { return _geometry;; }
-      set { _geometry = value; }
+      set
+      {
+        _geometry = value;
+        OnPropertyChanged(nameof(GeometryString));
+      }
     }
+
+    public string GeometryString { get => _geometry?.ToJson(); }
 
 
     /// <summary>
@@ -76,7 +82,7 @@ namespace festiflo_logistics_controller
     {
       await DataUtils.AddOperationalLayerAsync(_map, _userDataUrl, DataUtils.GetHeatmapRenderer());
       await DataUtils.AddOperationalLayerAsync(_map, _stagesURL);
-      //_geometry = await DataUtils.GetGeometry(_stagesURL);
+      JohnPeelGeometry = await DataUtils.GetGeometry(_stagesURL);
     }
 
     public void ReloadHeatMap()
