@@ -24,6 +24,7 @@ namespace festiflo_logistics_controller
   /// </summary>
   public class MapViewModel : INotifyPropertyChanged
   {
+//    private static string _userDataUrl = "https://cardiffportal.esri.com/server/rest/services/Hosted/FestiFeatureService/FeatureServer/0";// "http://cardiffportal.esri.com/server/rest/services/Hosted/FestivalTestPolys/FeatureServer/0";
     private static string _userDataUrl = "http://cardiffportal.esri.com/server/rest/services/Hosted/FestivalTestPolys/FeatureServer/0";
     private static string _stagesURL = "http://cardiffportal.esri.com/server/rest/services/Hosted/Stages/FeatureServer/3";
 
@@ -59,13 +60,13 @@ namespace festiflo_logistics_controller
 
     public async void LoadHeatMap()
     {
-      await AddOperationalLayerAsync(_map, _userDataUrl, GetHeatmapRenderer());
+      await DataUtils.AddOperationalLayerAsync(_map, _userDataUrl, DataUtils.GetHeatmapRenderer());
     }
 
     public async void ReloadLayers()
     {
-      await AddOperationalLayerAsync(_map, _userDataUrl, GetHeatmapRenderer());
-      await AddOperationalLayerAsync(_map, _stagesURL);
+      await DataUtils.AddOperationalLayerAsync(_map, _userDataUrl, DataUtils.GetHeatmapRenderer());
+      await DataUtils.AddOperationalLayerAsync(_map, _stagesURL);
     }
 
     public void ReloadHeatMap()
@@ -89,45 +90,7 @@ namespace festiflo_logistics_controller
 
 
     #region Utils
-    private async Task AddOperationalLayerAsync(Map map, string url, Renderer renderer = null)
-    {
-      var operationaLayer = await GetLayer(url, renderer);
-      map.OperationalLayers.Add(operationaLayer);
-    }
 
-    private async Task<FeatureLayer> GetLayer(string url, Renderer renderer = null)
-    {
-      FeatureLayer _opertionalLayer = new FeatureLayer(new Uri(url));
-      await _opertionalLayer.LoadAsync();
-
-      // Apply the renderer to a point layer in the map.
-      if (renderer != null)
-        _opertionalLayer.Renderer = renderer;
-
-      return _opertionalLayer;
-    }
-
-    private Renderer GetHeatmapRenderer()
-    {
-      // Create a new HeatMapRenderer with info provided by the user.
-      HeatMapRenderer heatMapRendererInfo = new HeatMapRenderer
-      {
-        BlurRadius = 14,
-        MinPixelIntensity = 0,
-        MaxPixelIntensity = 100,
-      };
-
-      // Add the chosen color stops (plus transparent for empty areas).
-      heatMapRendererInfo.AddColorStop(0.0, Colors.Transparent);
-      heatMapRendererInfo.AddColorStop(0.10, Colors.Red);
-      heatMapRendererInfo.AddColorStop(1.0, Colors.Yellow);
-
-      // Get the JSON representation of the renderer class.
-      string heatMapJson = heatMapRendererInfo.ToJson();
-
-      // Use the static Renderer.FromJson method to create a new renderer from the JSON string.
-      return Renderer.FromJson(heatMapJson);
-    }
     #endregion
 
   }
