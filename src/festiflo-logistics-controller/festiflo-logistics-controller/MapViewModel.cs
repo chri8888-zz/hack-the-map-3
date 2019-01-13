@@ -15,6 +15,7 @@ using Esri.ArcGISRuntime.Tasks;
 using Esri.ArcGISRuntime.UI;
 using HeatMapRendererJson;
 using System.Windows.Media;
+using System.Windows.Input;
 
 namespace festiflo_logistics_controller
 {
@@ -55,7 +56,13 @@ namespace festiflo_logistics_controller
     public event PropertyChangedEventHandler PropertyChanged;
 
 
-    private async void LoadHeatMap()
+    public async void LoadHeatMap()
+    {
+      var dataLayer = await GetHeatMapLayer();
+      _map.OperationalLayers.Add(dataLayer);
+    }
+
+    public async Task<FeatureLayer> GetHeatMapLayer()
     {
       FeatureLayer _dataLayer = new FeatureLayer(new Uri(_dataUrl));
       await _dataLayer.LoadAsync();
@@ -81,7 +88,26 @@ namespace festiflo_logistics_controller
 
       // Apply the renderer to a point layer in the map.
       _dataLayer.Renderer = heatMapRenderer;
-      _map.OperationalLayers.Add(_dataLayer);
+
+      return _dataLayer;
     }
+    public void ReloadHeatMap()
+    {
+      _map.OperationalLayers = new LayerCollection();
+      LoadHeatMap();
+      Map = new Map(BasemapType.ImageryWithLabels, 51.154, -2.581, 16);
+    }
+
+    private DelegateCommand reloadHeatMapCommand;
+    public ICommand ReloadHeatMapCommand
+    {
+      get
+      {
+        if (reloadHeatMapCommand == null)
+          reloadHeatMapCommand = new DelegateCommand(new Action(ReloadHeatMap));
+        return reloadHeatMapCommand;
+      }
+    }
+
   }
 }
