@@ -2,21 +2,28 @@ import http.client
 import urllib
 import json
 import requests
+import arcpy
+import datetime
+import time
 
 server = 'https://cardiffportal.esri.com'
 layer = '/server/rest/services/Hosted/FestiFeatureService/FeatureServer/0/'
 port = 6443
 
 USER_COUNT = 100
-MAX_UPDATES = 100
-CSV_FILE = 'output-crowd-web-mercator-100.csv'
+MAX_UPDATES = 1000
+CSV_FILE = 'output-crowd-sim-100.csv'
+SIMULATION_SPEED_FACTOR = 1
+
+inSR = arcpy.SpatialReference(3857)
+outSR = arcpy.SpatialReference(4326)
 
 class User():
   def __init__(self, track_id, x = 0.0, y = 0.0, date_time = None, velocity = 0.0, distance = 0.0, oid = None):
     self.id = track_id
     self.x = x
     self.y = y
-    # self.date_time = date_time
+    self.date_time = date_time
     self.velocity = velocity
     self.distance = distance
     self.oid = oid
@@ -144,6 +151,15 @@ def query_users():
 
   return user_records
 
+def convert_point(x, y):
+  pt = arcpy.Point()
+  pt.X = x
+  pt.Y = y
+  pt_geo = arcpy.PointGeometry(pt, inSR)
+  pt_geo1 = pt_geo.projectAs(outSR)
+  pt1 = pt_geo1.lastPoint
+  return [pt1.X, pt1.Y]
+
 def read_csv(filename):
   f = open(filename, 'r')
 
@@ -153,14 +169,16 @@ def read_csv(filename):
     if attributes[0].isdigit() == False:
       continue
 
-    id = int(attributes[1])
-    x = float(attributes[2])
-    y = float(attributes[3])
-    date_time = attributes[4]
-    velocity = float(attributes[5])
-    distance = float(attributes[6])
+    id = int(attributes[0])
+    x = float(attributes[1])
+    y = float(attributes[2])
+    date_time = attributes[3]
+    velocity = float(attributes[4])
+    distance = float(attributes[5])
 
-    user = User(id, x, y, date_time, velocity, distance)
+    pt_wgs_1984 = convert_point(x, y)
+
+    user = User(id, pt_wgs_1984[0], pt_wgs_1984[1], date_time, velocity, distance)
     users.append(user)
 
   return users
@@ -172,6 +190,10 @@ def create_users():
     users.append(user.to_json())
 
   send_users(users, 'addFeatures')  
+
+def convert_date(date_str):
+  date = datetime.datetime.strptime(date_str, '%m/%d/%Y %H:%M:%S %p')
+  return date
 
 if __name__ == "__main__":
   global token
@@ -202,9 +224,24 @@ if __name__ == "__main__":
   user_positions = read_csv(CSV_FILE)
 
   count = 0
+
+  start_time = convert_date(user_positions[0].date_time)
+  start_tick = time.clock()
+
   for user_position in user_positions:
     if count > MAX_UPDATES:
       exit()
+
+    current_time = convert_date(user_position.date_time)
+    current_tick = time.clock()
+
+    user_delta = (current_time - start_time).seconds
+    print(user_delta)
+    simulation_delta = (current_tick - start_tick) * SIMULATION_SPEED_FACTOR
+    print(simulation_delta)
+
+    if simulation_delta < user_delta:
+      continue
 
     count += 1
 
@@ -217,3 +254,4 @@ if __name__ == "__main__":
     current_user.distance = user_position.distance
     
     edit_users([current_user.to_json()])
+    print("updating user")
