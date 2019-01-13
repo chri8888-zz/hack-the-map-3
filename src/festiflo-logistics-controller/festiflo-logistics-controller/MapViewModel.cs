@@ -24,16 +24,20 @@ namespace festiflo_logistics_controller
   /// </summary>
   public class MapViewModel : INotifyPropertyChanged
   {
-//    private static string _userDataUrl = "https://cardiffportal.esri.com/server/rest/services/Hosted/FestiFeatureService/FeatureServer/0";// "http://cardiffportal.esri.com/server/rest/services/Hosted/FestivalTestPolys/FeatureServer/0";
-    private static string _userDataUrl = "http://cardiffportal.esri.com/server/rest/services/Hosted/FestivalTestPolys/FeatureServer/0";
-    private static string _stagesURL = "http://cardiffportal.esri.com/server/rest/services/Hosted/Stages/FeatureServer/3";
+    private static string _userDataUrl = "https://cardiffportal.esri.com/server/rest/services/Hosted/FestiFeatureService/FeatureServer/0";// "http://cardiffportal.esri.com/server/rest/services/Hosted/FestivalTestPolys/FeatureServer/0";
+    //    private static string _userDataUrl = "http://cardiffportal.esri.com/server/rest/services/Hosted/FestivalTestPolys/FeatureServer/0";
+    private static string _stagesURL = "http://cardiffportal.esri.com/server/rest/services/Hosted/Stages_WebMercator/FeatureServer/3";// "http://cardiffportal.esri.com/server/rest/services/Hosted/Stages/FeatureServer/3";
+    private static string _toiletsURL = "http://cardiffportal.esri.com/server/rest/services/Hosted/ToiletsWGS/FeatureServer/0";
+    private static string _carParksURL = "http://cardiffportal.esri.com/server/rest/services/Hosted/CarParks/FeatureServer/5";
+    private static string _entrancesURL = "http://cardiffportal.esri.com/server/rest/services/Hosted/EntrancesStar/FeatureServer/1"; // "http://cardiffportal.esri.com/server/rest/services/Hosted/Entrances/FeatureServer/1";
+    private static string _campsitesURL = "http://cardiffportal.esri.com/server/rest/services/Hosted/Campsites/FeatureServer/3";
 
     public MapViewModel()
     {
       LoadHeatMap();
     }
 
-    private Map _map = new Map(BasemapType.ImageryWithLabelsVector, 51.155, -2.584, 16);
+    private Map _map = new Map(BasemapType.ImageryWithLabelsVector, 51.155, -2.585, 14);
 
     /// <summary>
     /// Gets or sets the map
@@ -58,6 +62,15 @@ namespace festiflo_logistics_controller
 
     public string GeometryString { get => _geometry?.ToJson(); }
 
+    private string geomCount;
+
+    public string GeomCount
+    {
+      get { return geomCount; }
+      set { geomCount = value; }
+    }
+
+
 
     /// <summary>
     /// Raises the <see cref="MapViewModel.PropertyChanged" /> event
@@ -81,8 +94,17 @@ namespace festiflo_logistics_controller
     public async void ReloadLayers()
     {
       await DataUtils.AddOperationalLayerAsync(_map, _userDataUrl, DataUtils.GetHeatmapRenderer());
+      await DataUtils.AddOperationalLayerAsync(_map, _campsitesURL);
+      await DataUtils.AddOperationalLayerAsync(_map, _carParksURL);
+      await DataUtils.AddOperationalLayerAsync(_map, _toiletsURL);
+      await DataUtils.AddOperationalLayerAsync(_map, _entrancesURL);
       await DataUtils.AddOperationalLayerAsync(_map, _stagesURL);
+
       JohnPeelGeometry = await DataUtils.GetGeometry(_stagesURL);
+
+      var users = await DataUtils.GetGeometries(_userDataUrl, "oid > 0");
+
+      GeomCount = "At first poly: " + DataUtils.GetContainedCount(users, JohnPeelGeometry, 200).ToString();
     }
 
     public void ReloadHeatMap()
