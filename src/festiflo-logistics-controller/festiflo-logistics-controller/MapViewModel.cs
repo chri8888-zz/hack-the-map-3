@@ -104,7 +104,7 @@ namespace festiflo_logistics_controller
 
       var users = await DataUtils.GetGeometries(_userDataUrl, "oid > 0");
 
-      GeomCount = DataUtils.GetContainedCount(users, JohnPeelGeometry).ToString();
+      GeomCount = "At first poly: " + DataUtils.GetContainedCount(users, JohnPeelGeometry, 200).ToString();
     }
 
     public void ReloadHeatMap()

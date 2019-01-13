@@ -127,7 +127,7 @@ namespace festiflo_logistics_controller
       return resultingFeature.GetAttributeValue(fieldName);
     }
 
-    public static int GetContainedCount(List<Esri.ArcGISRuntime.Geometry.Geometry> countableGeometries, Esri.ArcGISRuntime.Geometry.Geometry containingPolygon)
+    public static int GetContainedCount(List<Esri.ArcGISRuntime.Geometry.Geometry> countableGeometries, Esri.ArcGISRuntime.Geometry.Geometry containingPolygon, int bufferInMeters = 0)
     {
       var count = 0;
       if (countableGeometries == null || containingPolygon.GeometryType != Esri.ArcGISRuntime.Geometry.GeometryType.Polygon)
@@ -135,6 +135,8 @@ namespace festiflo_logistics_controller
 
       var polyCorrected = GeometryEngine.RemoveZAndM(containingPolygon);
       polyCorrected = Esri.ArcGISRuntime.Geometry.Geometry.FromJson(polyCorrected.ToJson());
+
+      polyCorrected = GeometryEngine.Buffer(polyCorrected, bufferInMeters);
 
       foreach (var geom in countableGeometries)
       {
