@@ -6,11 +6,26 @@
         xmlns:esri="http://schemas.esri.com/arcgis/runtime/2013"
         xmlns:local="clr-namespace:festiflo_logistics_controller"
         mc:Ignorable="d"
-        Title="MainWindow" Height="525" Width="790">
-    <Window.Resources>
-        <local:MapViewModel x:Key="MapViewModel" />
-    </Window.Resources>
-    <Grid>
-        <esri:MapView Map="{Binding Map, Source={StaticResource MapViewModel}}" />
+        Title="MainWindow" Height="650" Width="900">
+  <Window.Resources>
+    <local:MapViewModel x:Key="MapViewModel" />
+  </Window.Resources>
+  <Grid>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="200"/>
+      <ColumnDefinition/>
+    </Grid.ColumnDefinitions>
+    <Grid Grid.Column="0">
+      <Grid.RowDefinitions>
+        <RowDefinition/>
+        <RowDefinition/>
+      </Grid.RowDefinitions>
+      <Button Grid.Row="0"
+              Content="Refresh data"
+              Width="120" Height="25"
+              Command="{Binding ReloadHeatMapCommand, Source={StaticResource MapViewModel}}"/>
+      <TextBlock Grid.Row="1" Text="{Binding JohnPeelGeometry, Source={StaticResource MapViewModel}}"/>
     </Grid>
+    <esri:MapView Grid.Column="1" Map="{Binding Map, Source={StaticResource MapViewModel}}" />
+  </Grid>
 </Window>
