@@ -55,7 +55,7 @@ def get_token(username, password, url):
         token = json.loads(data)        
         return token["token"]         
 
-def send_features(features, request_url):
+def send_users(features, request_url):
   params = urllib.parse.urlencode({'token': token, 'f': 'pjson'})
   headers = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/plain"}
 
@@ -72,24 +72,42 @@ def send_features(features, request_url):
   # else:
   #   data = response.text
 
-def query_features():
+def query_users():
   url = server + layer + 'query'
 
-  features_json = http_post(url, {'where': 'oid > 0'})
+  features_json = http_post(url, {'where': 'oid > 0', 'outfields': '*'})
   if len(features_json) == 0:
     print("Failed to query features")
     return 
 
   query_result = json.loads(features_json)
-  print(features_json)
-  features = query_result['features']
-  if features == None:
-    return
+  if 'features' in query_result.keys() == False:
+    print("Failed to query features")
+    return None
+  
+  users = query_result['features']
 
-  print(len(features))
+  user_records = {}
+  for user in users:
+    if 'attributes' in user.keys() == False:
+      continue
 
-def create_feature(track_id, x = 0.0, y = 0.0, date_time = None, velocity = 0.0, distance = 0.0):
-  return {
+    attributes = user['attributes']    
+    user_id = attributes['id']
+    oid = attributes['oid']
+    x = attributes['x']
+    y = attributes['y']
+    date_time = attributes['date_time']
+    velocity = attributes['velocity']
+    distance = attributes['distance']
+
+    user_record = create_user(user_id, x, y, date_time, velocity, distance, oid)
+    user_records[user_id] = user_record
+
+  return user_records
+
+def create_user(track_id, x = 0.0, y = 0.0, date_time = None, velocity = 0.0, distance = 0.0, oid = None):
+  user = {
     'attributes': {
       # 'oid': oid,
       'id': track_id,
@@ -105,30 +123,32 @@ def create_feature(track_id, x = 0.0, y = 0.0, date_time = None, velocity = 0.0,
     }
   }
 
+  if oid != None:
+    user['attributes']['oid'] = oid
+
 def read_csv(filename):
   f = open(filename, 'r')
 
-  features = []
+  users = []
   for line in f.readlines():
     attributes = line.split(',')
 
     id = attributes[0]
-    feature = create_feature(id, attributes[1], attributes[2], attributes[3], attributes[4], attributes[5])
-    features.append(feature)
+    user = create_user(id, attributes[1], attributes[2], attributes[3], attributes[4], attributes[5])
+    users.append(user)
 
-  return features
+  return users
 
 def create_users():
   users = []
   for i in range(1, USER_COUNT):
-    feature = create_feature(i)
+    feature = create_user(i)
     features.append(feature)
 
   send_features(features, 'addFeatures')  
 
 if __name__ == "__main__":
   global token
-  feature = create_feature(1, 1)
   
   login = open('./login.txt', 'r')
   lines = login.readlines()
@@ -136,15 +156,22 @@ if __name__ == "__main__":
   passwd = lines[1].strip()
 
   token = get_token(user, passwd, server)
-  current_features = query_features()
+  current_users = query_users()
 
-  # features = []
-  # for i in range(0, USER_COUNT - 1):
-  #   feature = create_feature(i)
-  #   features.append(feature)
+  current_user_count = len(current_users)
+  if current_user_count == 0:
+    print('creating users please restart')
+    features = []
+    for i in range(0, USER_COUNT - 1):
+      feature = create_feature(i)
+      features.append(feature)
 
-  # //send_features(features, 'addFeatures')
+    send_features(features, 'addFeatures')
+    exit()
+  elif current_user_count != USER_COUNT - 1:
+    print("Invalid number of users. Deleting. Please restart")
+    exit() 
 
-  # user_positions = read_csv()
+  user_positions = read_csv(CSV_FILE)
   # print(len(user_positions))
 
