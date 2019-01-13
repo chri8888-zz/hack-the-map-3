@@ -24,14 +24,15 @@ namespace festiflo_logistics_controller
   /// </summary>
   public class MapViewModel : INotifyPropertyChanged
   {
-    private static string _dataUrl = "http://cardiffportal.esri.com/server/rest/services/Hosted/FestivalTestPolys/FeatureServer/0";
+    private static string _userDataUrl = "http://cardiffportal.esri.com/server/rest/services/Hosted/FestivalTestPolys/FeatureServer/0";
+    private static string _stagesURL = "http://cardiffportal.esri.com/server/rest/services/Hosted/Stages/FeatureServer/3";
 
     public MapViewModel()
     {
       LoadHeatMap();
     }
 
-    private Map _map = new Map(BasemapType.ImageryWithLabels, 51.154, -2.581, 16);
+    private Map _map = new Map(BasemapType.ImageryWithLabels, 51.155, -2.584, 16);
 
     /// <summary>
     /// Gets or sets the map
@@ -58,15 +59,56 @@ namespace festiflo_logistics_controller
 
     public async void LoadHeatMap()
     {
-      var dataLayer = await GetHeatMapLayer();
-      _map.OperationalLayers.Add(dataLayer);
+      await AddOperationalLayerAsync(_map, _userDataUrl, GetHeatmapRenderer());
     }
 
-    public async Task<FeatureLayer> GetHeatMapLayer()
+    public async void ReloadLayers()
     {
-      FeatureLayer _dataLayer = new FeatureLayer(new Uri(_dataUrl));
-      await _dataLayer.LoadAsync();
+      await AddOperationalLayerAsync(_map, _userDataUrl, GetHeatmapRenderer());
+      await AddOperationalLayerAsync(_map, _stagesURL);
+    }
 
+    public void ReloadHeatMap()
+    {
+      _map.OperationalLayers = new LayerCollection();
+      ReloadLayers();
+    }
+
+    #region Commands
+    private DelegateCommand reloadHeatMapCommand;
+    public ICommand ReloadHeatMapCommand
+    {
+      get
+      {
+        if (reloadHeatMapCommand == null)
+          reloadHeatMapCommand = new DelegateCommand(new Action(ReloadHeatMap));
+        return reloadHeatMapCommand;
+      }
+    }
+    #endregion
+
+
+    #region Utils
+    private async Task AddOperationalLayerAsync(Map map, string url, Renderer renderer = null)
+    {
+      var operationaLayer = await GetLayer(url, renderer);
+      map.OperationalLayers.Add(operationaLayer);
+    }
+
+    private async Task<FeatureLayer> GetLayer(string url, Renderer renderer = null)
+    {
+      FeatureLayer _opertionalLayer = new FeatureLayer(new Uri(url));
+      await _opertionalLayer.LoadAsync();
+
+      // Apply the renderer to a point layer in the map.
+      if (renderer != null)
+        _opertionalLayer.Renderer = renderer;
+
+      return _opertionalLayer;
+    }
+
+    private Renderer GetHeatmapRenderer()
+    {
       // Create a new HeatMapRenderer with info provided by the user.
       HeatMapRenderer heatMapRendererInfo = new HeatMapRenderer
       {
@@ -84,30 +126,9 @@ namespace festiflo_logistics_controller
       string heatMapJson = heatMapRendererInfo.ToJson();
 
       // Use the static Renderer.FromJson method to create a new renderer from the JSON string.
-      var heatMapRenderer = Renderer.FromJson(heatMapJson);
-
-      // Apply the renderer to a point layer in the map.
-      _dataLayer.Renderer = heatMapRenderer;
-
-      return _dataLayer;
+      return Renderer.FromJson(heatMapJson);
     }
-    public void ReloadHeatMap()
-    {
-      _map.OperationalLayers = new LayerCollection();
-      LoadHeatMap();
-      Map = new Map(BasemapType.ImageryWithLabels, 51.154, -2.581, 16);
-    }
-
-    private DelegateCommand reloadHeatMapCommand;
-    public ICommand ReloadHeatMapCommand
-    {
-      get
-      {
-        if (reloadHeatMapCommand == null)
-          reloadHeatMapCommand = new DelegateCommand(new Action(ReloadHeatMap));
-        return reloadHeatMapCommand;
-      }
-    }
+    #endregion
 
   }
 }
