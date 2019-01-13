@@ -1,12 +1,12 @@
-crowd-size: 2000
-max-visits: 20
-pulse-resolution: 25
+crowd-size: 1000
+max-visits: 4
+pulse-resolution: 10
 pulse-resolution-error: 5
 meters-to-unit: 1
 location-error: 20
-start-time-range: 50
+start-time-range: 10
 vel: 1.4
-vel-error: 1.0
+vel-error: 0.4
 start-date-year: 2016
 start-date-month: 6
 start-date-day: 22

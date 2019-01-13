@@ -53,7 +53,17 @@ def load_points_from_csv(name):
 
 def export(path, events):
     route_stringer = "id,x,y,time,velocity,distance\n"
+    max = len(events)
+
+    count = 0
     for event in events:
+        count += 1
+
+        if count % 10000 == 0:
+            completion_ratio = (count / max) * 100.0
+            s = str(int(completion_ratio)) + "%"
+            print(s, end="\r")
+
         # Event to string
         (id, str_x, str_y, str_time, str_vel, str_distance) = event
         str_id = str(id)
@@ -197,9 +207,13 @@ for id in range(crowd_size):
         device_pulse_events.append(
             (id, current_point[0], current_point[1], total_traverse_time, calculated_vel, total_traverse_distance))
 
-print("Start export")
 
 # Export sorted events to CSV
-export("output-crowd-sim.csv", sorted(device_pulse_events,
-                                      key=lambda time_stamp: time_stamp[3]))
+sort = sorted(device_pulse_events,
+              key=lambda time_stamp: time_stamp[3])
+print("Total simulated window: " + str(sort[0][3]) + " -> " + str(sort[-1][3]))
+print("Total events: " + str(len(sort)))
+
+print("Start export")
+export("output-crowd-sim.csv", sort)
 print("Complete")
