@@ -24,8 +24,8 @@ namespace festiflo_logistics_controller
   /// </summary>
   public class MapViewModel : INotifyPropertyChanged
   {
-//    private static string _userDataUrl = "https://cardiffportal.esri.com/server/rest/services/Hosted/FestiFeatureService/FeatureServer/0";// "http://cardiffportal.esri.com/server/rest/services/Hosted/FestivalTestPolys/FeatureServer/0";
-    private static string _userDataUrl = "http://cardiffportal.esri.com/server/rest/services/Hosted/FestivalTestPolys/FeatureServer/0";
+    private static string _userDataUrl = "https://cardiffportal.esri.com/server/rest/services/Hosted/FestiFeatureService/FeatureServer/0";// "http://cardiffportal.esri.com/server/rest/services/Hosted/FestivalTestPolys/FeatureServer/0";
+//    private static string _userDataUrl = "http://cardiffportal.esri.com/server/rest/services/Hosted/FestivalTestPolys/FeatureServer/0";
     private static string _stagesURL = "http://cardiffportal.esri.com/server/rest/services/Hosted/Stages/FeatureServer/3";
 
     public MapViewModel()
