@@ -1,4 +1,5 @@
-﻿using Esri.ArcGISRuntime.Mapping;
+﻿using Esri.ArcGISRuntime.Data;
+using Esri.ArcGISRuntime.Mapping;
 using Esri.ArcGISRuntime.Symbology;
 using HeatMapRendererJson;
 using System;
@@ -13,13 +14,6 @@ namespace festiflo_logistics_controller
 {
   class DataUtils
   {
-    //    private static const TupleList<double, Color> defaultColorStops = new TupleList<double, Color>
-    //{
-    //    { 0.0, Colors.Transparent },
-    //    { 0.10, Colors.Red },
-    //    { 1.0, Colors.Yellow }
-    //};
-
     private static readonly IList<(double ratio, Color color)> defaultColorStops = new ReadOnlyCollection<(double, Color)>
       (new List<(double, Color)> {
         { (0.0, Colors.Transparent) },
@@ -63,7 +57,7 @@ namespace festiflo_logistics_controller
       };
 
       // Add the chosen color stops (plus transparent for empty areas).
-      colorStops = colorStops ?? defaultColorStops; 
+      colorStops = colorStops ?? defaultColorStops;
       foreach (var ColorStop in colorStops)
       {
         heatMapRendererInfo.AddColorStop(ColorStop.ratio, ColorStop.color);
@@ -75,6 +69,21 @@ namespace festiflo_logistics_controller
 
       // Use the static Renderer.FromJson method to create a new renderer from the JSON string.
       return Renderer.FromJson(heatMapJson);
+    }
+
+    public static async Task<Esri.ArcGISRuntime.Geometry.Geometry> GetGeometry(string url)
+    {
+      var table = new ServiceFeatureTable(new Uri(url));
+      await table.LoadAsync();
+      if (table.GeometryType != Esri.ArcGISRuntime.Geometry.GeometryType.Polygon)
+        return null;
+
+      var queryParams = new QueryParameters();
+      queryParams.WhereClause = "Name = \"John Peel Stage\"";
+      var count = await table.QueryFeatureCountAsync(queryParams);
+      var queryFeatureResults = await table.QueryFeaturesAsync(queryParams);
+      var resultingFeature = queryFeatureResults.FirstOrDefault();
+      return resultingFeature.Geometry;
     }
   }
 }

@@ -33,7 +33,7 @@ namespace festiflo_logistics_controller
       LoadHeatMap();
     }
 
-    private Map _map = new Map(BasemapType.ImageryWithLabels, 51.155, -2.584, 16);
+    private Map _map = new Map(BasemapType.ImageryWithLabelsVector, 51.155, -2.584, 16);
 
     /// <summary>
     /// Gets or sets the map
@@ -43,6 +43,15 @@ namespace festiflo_logistics_controller
       get { return _map; }
       set { _map = value; OnPropertyChanged(); }
     }
+
+    private Esri.ArcGISRuntime.Geometry.Geometry _geometry;
+
+    public Esri.ArcGISRuntime.Geometry.Geometry JohnPeelGeometry
+    {
+      get { return _geometry;; }
+      set { _geometry = value; }
+    }
+
 
     /// <summary>
     /// Raises the <see cref="MapViewModel.PropertyChanged" /> event
@@ -67,6 +76,7 @@ namespace festiflo_logistics_controller
     {
       await DataUtils.AddOperationalLayerAsync(_map, _userDataUrl, DataUtils.GetHeatmapRenderer());
       await DataUtils.AddOperationalLayerAsync(_map, _stagesURL);
+      //_geometry = await DataUtils.GetGeometry(_stagesURL);
     }
 
     public void ReloadHeatMap()

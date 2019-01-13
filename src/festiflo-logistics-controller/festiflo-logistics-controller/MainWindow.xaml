@@ -24,6 +24,7 @@
               Content="Refresh data"
               Width="120" Height="25"
               Command="{Binding ReloadHeatMapCommand, Source={StaticResource MapViewModel}}"/>
+      <TextBlock Grid.Row="1" Text="{Binding JohnPeelGeometry, Source={StaticResource MapViewModel}}"/>
     </Grid>
     <esri:MapView Grid.Column="1" Map="{Binding Map, Source={StaticResource MapViewModel}}" />
   </Grid>
