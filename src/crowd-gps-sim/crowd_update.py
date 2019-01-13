@@ -12,10 +12,10 @@ server = 'https://cardiffportal.esri.com'
 layer = '/server/rest/services/Hosted/FestiFeatureService/FeatureServer/0/'
 port = 6443
 
-USER_COUNT = 100
-MAX_UPDATES = 10
-CSV_FILE = 'output-crowd-sim-1.csv'
-SIMULATION_SPEED_FACTOR = 1000
+USER_COUNT = 1000
+MAX_UPDATES = 10000
+CSV_FILE = 'output-crowd-sim-GOOD-converted.csv'
+SIMULATION_SPEED_FACTOR = 1
 
 inSR = arcpy.SpatialReference(3857)
 outSR = arcpy.SpatialReference(4326)
@@ -119,6 +119,18 @@ def edit_users(features):
   features_json = json.dumps(features)
   http_post(url, {'updates': features_json})
 
+def create_users():
+  users = []
+  for i in range(0, USER_COUNT):
+    user = User(i)
+    users.append(user.to_json())
+
+  send_users(users, 'addFeatures')  
+
+def delete_users():
+  url = server + layer + 'deleteFeatures'
+  http_post(url, {'where': 'oid > 0'})
+
 def query_users():
   url = server + layer + 'query'
 
@@ -175,25 +187,18 @@ def read_csv(filename):
     x = float(attributes[1])
     y = float(attributes[2])
     date_time = attributes[3]
-    velocity = float(attributes[4])
-    distance = float(attributes[5])
+    # velocity = float(attributes[4])
+    # distance = float(attributes[5])
 
-    pt_wgs_1984 = convert_point(x, y)
-
-    user = User(id, pt_wgs_1984[0], pt_wgs_1984[1], date_time, velocity, distance)
+    # pt_wgs_1984 = convert_point(x, y)
+    pt_wgs_1984 = [x, y]
+    user = User(id, pt_wgs_1984[0], pt_wgs_1984[1], date_time)
     users.append(user)
 
   return users
 
-def create_users():
-  users = []
-  for i in range(0, USER_COUNT):
-    user = User(i)
-    users.append(user.to_json())
-
-  send_users(users, 'addFeatures')  
-
 def convert_date(date_str):
+  date_str = date_str.strip()
   date = datetime.datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S.%f')
   return date
 
@@ -210,19 +215,31 @@ if __name__ == "__main__":
   print("Queried users")
 
   current_user_count = len(current_users)
-  if current_user_count == 0:
-    print('creating users please restart')
-    features = []
-    for i in range(0, USER_COUNT):
-      user = User(i)
-      features.append(user.to_json())
+  if current_user_count != USER_COUNT:
+    print('Resting users')
+    delete_users()
+    create_users()
+    current_users = query_users()
+    current_user_count = len(current_users)
+    if current_user_count != USER_COUNT:
+      print("Something went wrong creating users")
+      exit()
+    else:
+      print('Updated users')
 
-    send_users(features, 'addFeatures')
-    exit()
-  elif current_user_count != USER_COUNT:
-    print("Invalid number of users. Deleting. Please restart")
-    print(current_user_count)
-    exit() 
+  # if current_user_count == 0:
+  #   print('creating users please restart')
+  #   features = []
+  #   for i in range(0, USER_COUNT):
+  #     user = User(i)
+  #     features.append(user.to_json())
+
+  #   send_users(features, 'addFeatures')
+  #   exit()
+  # elif current_user_count != USER_COUNT:
+  #   print("Invalid number of users. Deleting. Please restart")
+  #   print(current_user_count)
+  #   exit() 
 
   user_positions = read_csv(CSV_FILE)
   print("loaded simulation file")
@@ -259,4 +276,4 @@ if __name__ == "__main__":
     current_user.distance = user_position.distance
     
     edit_users([current_user.to_json()])
-    print("Updating user")
+    #print("Updating user")
