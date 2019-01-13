@@ -6,14 +6,16 @@ import arcpy
 import datetime
 import time
 
+requests.packages.urllib3.disable_warnings() 
+
 server = 'https://cardiffportal.esri.com'
 layer = '/server/rest/services/Hosted/FestiFeatureService/FeatureServer/0/'
 port = 6443
 
 USER_COUNT = 100
-MAX_UPDATES = 1000
-CSV_FILE = 'output-crowd-sim-100.csv'
-SIMULATION_SPEED_FACTOR = 1
+MAX_UPDATES = 10
+CSV_FILE = 'output-crowd-sim-1.csv'
+SIMULATION_SPEED_FACTOR = 1000
 
 inSR = arcpy.SpatialReference(3857)
 outSR = arcpy.SpatialReference(4326)
@@ -192,7 +194,7 @@ def create_users():
   send_users(users, 'addFeatures')  
 
 def convert_date(date_str):
-  date = datetime.datetime.strptime(date_str, '%m/%d/%Y %H:%M:%S %p')
+  date = datetime.datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S.%f')
   return date
 
 if __name__ == "__main__":
@@ -205,6 +207,7 @@ if __name__ == "__main__":
 
   token = get_token(user, passwd, server)
   current_users = query_users()
+  print("Queried users")
 
   current_user_count = len(current_users)
   if current_user_count == 0:
@@ -222,27 +225,29 @@ if __name__ == "__main__":
     exit() 
 
   user_positions = read_csv(CSV_FILE)
+  print("loaded simulation file")
 
   count = 0
 
   start_time = convert_date(user_positions[0].date_time)
   start_tick = time.clock()
 
-  for user_position in user_positions:
+  while len(user_positions) > 0:
     if count > MAX_UPDATES:
       exit()
+
+    user_position = user_positions[0]
 
     current_time = convert_date(user_position.date_time)
     current_tick = time.clock()
 
     user_delta = (current_time - start_time).seconds
-    print(user_delta)
     simulation_delta = (current_tick - start_tick) * SIMULATION_SPEED_FACTOR
-    print(simulation_delta)
 
     if simulation_delta < user_delta:
       continue
 
+    user_positions.remove(user_position)
     count += 1
 
     id = user_position.id
@@ -254,4 +259,4 @@ if __name__ == "__main__":
     current_user.distance = user_position.distance
     
     edit_users([current_user.to_json()])
-    print("updating user")
+    print("Updating user")
