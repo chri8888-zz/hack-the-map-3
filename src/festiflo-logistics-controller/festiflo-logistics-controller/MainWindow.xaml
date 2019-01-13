@@ -26,6 +26,7 @@
               Command="{Binding ReloadHeatMapCommand, Source={StaticResource MapViewModel}}"/>
       <TextBlock Grid.Row="1" Text="{Binding GeometryString, Source={StaticResource MapViewModel}}" TextWrapping="Wrap"/>
     </Grid>
-    <esri:MapView Grid.Column="1" Map="{Binding Map, Source={StaticResource MapViewModel}}" />
+    <esri:MapView Grid.Column="1" Map="{Binding Map, Source={StaticResource MapViewModel}}"
+                  MouseDoubleClick="MapView_MouseDoubleClick" />
   </Grid>
 </Window>

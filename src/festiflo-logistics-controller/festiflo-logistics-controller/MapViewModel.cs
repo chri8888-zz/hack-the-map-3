@@ -48,7 +48,7 @@ namespace festiflo_logistics_controller
 
     public Esri.ArcGISRuntime.Geometry.Geometry JohnPeelGeometry
     {
-      get { return _geometry;; }
+      get { return _geometry; }
       set
       {
         _geometry = value;
