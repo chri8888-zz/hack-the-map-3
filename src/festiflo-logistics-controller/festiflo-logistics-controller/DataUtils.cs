@@ -1,4 +1,5 @@
 ﻿using Esri.ArcGISRuntime.Data;
+using Esri.ArcGISRuntime.Geometry;
 using Esri.ArcGISRuntime.Mapping;
 using Esri.ArcGISRuntime.Symbology;
 using HeatMapRendererJson;
@@ -128,7 +129,7 @@ namespace festiflo_logistics_controller
       return Renderer.FromJson(heatMapJson);
     }
 
-    public static async Task<Esri.ArcGISRuntime.Geometry.Geometry> GetGeometry(string url)
+    public static async Task<Esri.ArcGISRuntime.Geometry.Geometry> GetGeometry(string url, string whereClause = "objectid > 0")
     {
       var table = new ServiceFeatureTable(new Uri(url));
       await table.LoadAsync();
@@ -142,5 +143,72 @@ namespace festiflo_logistics_controller
       var resultingFeature = queryFeatureResults.FirstOrDefault();
       return resultingFeature.Geometry;
     }
+
+    public static async Task<List<Esri.ArcGISRuntime.Geometry.Geometry>> GetGeometries(string url, string whereClause = "objectid > 0")
+    {
+      var geometries = new List<Esri.ArcGISRuntime.Geometry.Geometry>();
+
+      try
+      {
+        var table = new ServiceFeatureTable(new Uri(url));
+        await table.LoadAsync();
+
+        var queryParams = new QueryParameters();
+        queryParams.WhereClause = whereClause;
+        var count = await table.QueryFeatureCountAsync(queryParams);
+        var queryFeatureResults = await table.QueryFeaturesAsync(queryParams);
+
+        foreach (var result in queryFeatureResults)
+          geometries.Add(result.Geometry);
+      }
+      catch (Exception)
+      {
+      }
+
+      return geometries;
+    }
+
+
+    public static async Task<object> GetAttribute(string url, string whereClause = "", string fieldName = "")
+    {
+      var table = new ServiceFeatureTable(new Uri(url));
+      await table.LoadAsync();
+      if (table.GeometryType != Esri.ArcGISRuntime.Geometry.GeometryType.Polygon)
+        return null;
+
+      var queryParams = new QueryParameters();
+      queryParams.WhereClause = whereClause;
+      var count = await table.QueryFeatureCountAsync(queryParams);
+      var queryFeatureResults = await table.QueryFeaturesAsync(queryParams);
+      var resultingFeature = queryFeatureResults.FirstOrDefault();
+      return resultingFeature.GetAttributeValue(fieldName);
+    }
+
+    public static int GetContainedCount(List<Esri.ArcGISRuntime.Geometry.Geometry> countableGeometries, Esri.ArcGISRuntime.Geometry.Geometry containingPolygon, int bufferInMeters = 0)
+    {
+      var count = 0;
+      if (countableGeometries == null || containingPolygon.GeometryType != Esri.ArcGISRuntime.Geometry.GeometryType.Polygon)
+        return count;
+
+      var polyCorrected = GeometryEngine.RemoveZAndM(containingPolygon);
+      polyCorrected = Esri.ArcGISRuntime.Geometry.Geometry.FromJson(polyCorrected.ToJson());
+
+      polyCorrected = GeometryEngine.Buffer(polyCorrected, bufferInMeters);
+
+      foreach (var geom in countableGeometries)
+      {
+        if (polyCorrected.SpatialReference != geom.SpatialReference)
+          polyCorrected = GeometryEngine.Project(polyCorrected, geom.SpatialReference);
+
+        var geomCorrected = GeometryEngine.RemoveZAndM(geom);
+        geomCorrected = Esri.ArcGISRuntime.Geometry.Geometry.FromJson(geomCorrected.ToJson());
+
+        var isContained = Esri.ArcGISRuntime.Geometry.GeometryEngine.Contains(polyCorrected, geomCorrected);
+        count += isContained ? 1 : 0;
+      }
+
+      return count;
+    }
+
   }
 }
