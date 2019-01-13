@@ -8,7 +8,40 @@ layer = '/server/rest/services/Hosted/FestiFeatureService/FeatureServer/0/'
 port = 6443
 
 USER_COUNT = 100
-CSV_FILE = './output_crowd_sim-100.csv'
+MAX_UPDATES = 0
+CSV_FILE = 'output-crowd-sim-100.csv'
+
+class User():
+  def __init__(self, track_id, x = 0.0, y = 0.0, date_time = None, velocity = 0.0, distance = 0.0, oid = None):
+    self.id = track_id
+    self.x = x
+    self.y = y
+    self.date_time = date_time
+    self.velocity = velocity
+    self.distance = distance
+    self.oid = oid
+
+  def to_json(self):
+    user = {
+      'attributes': {
+        # 'oid': oid,
+        'id': self.id,
+        'x': self.x,
+        'y': self.y,
+        'date_time': self.date_time,
+        'velocity': self.velocity,
+        'distance': self.distance
+      },
+      'geometry': {
+        'x': self.x,
+        'y': self.y
+      }
+    }
+
+    if self.oid != None:
+      user['attributes']['oid'] = self.oid
+
+    return user
 
 def http_post(url, data, post_params = None):
   global token
@@ -101,30 +134,10 @@ def query_users():
     velocity = attributes['velocity']
     distance = attributes['distance']
 
-    user_record = create_user(user_id, x, y, date_time, velocity, distance, oid)
+    user_record = User(user_id, x, y, date_time, velocity, distance, oid)
     user_records[user_id] = user_record
 
   return user_records
-
-def create_user(track_id, x = 0.0, y = 0.0, date_time = None, velocity = 0.0, distance = 0.0, oid = None):
-  user = {
-    'attributes': {
-      # 'oid': oid,
-      'id': track_id,
-      'x': x,
-      'y': y,
-      'date_time': date_time,
-      'velocity': velocity,
-      'distance': distance
-    },
-    'geometry': {
-      'x': x,
-      'y': y
-    }
-  }
-
-  if oid != None:
-    user['attributes']['oid'] = oid
 
 def read_csv(filename):
   f = open(filename, 'r')
@@ -132,20 +145,28 @@ def read_csv(filename):
   users = []
   for line in f.readlines():
     attributes = line.split(',')
+    if attributes[0].isdigit() == False:
+      continue
 
-    id = attributes[0]
-    user = create_user(id, attributes[1], attributes[2], attributes[3], attributes[4], attributes[5])
+    id = int(attributes[0])
+    x = float(attributes[1])
+    y = float(attributes[2])
+    date_time = attributes[3]
+    velocity = float(attributes[4])
+    distance = float(attributes[5])
+
+    user = User(id, x, y, date_time, velocity, distance)
     users.append(user)
 
   return users
 
 def create_users():
   users = []
-  for i in range(1, USER_COUNT):
-    feature = create_user(i)
-    features.append(feature)
+  for i in range(USER_COUNT):
+    user = User(i)
+    users.append(user.to_json())
 
-  send_features(features, 'addFeatures')  
+  send_users(users, 'addFeatures')  
 
 if __name__ == "__main__":
   global token
@@ -162,16 +183,30 @@ if __name__ == "__main__":
   if current_user_count == 0:
     print('creating users please restart')
     features = []
-    for i in range(0, USER_COUNT - 1):
-      feature = create_feature(i)
-      features.append(feature)
+    for i in range(0, USER_COUNT):
+      user = User(i)
+      features.append(user.to_json())
 
-    send_features(features, 'addFeatures')
+    send_users(features, 'addFeatures')
     exit()
   elif current_user_count != USER_COUNT - 1:
     print("Invalid number of users. Deleting. Please restart")
     exit() 
 
   user_positions = read_csv(CSV_FILE)
-  # print(len(user_positions))
 
+  count = 0
+  for user_position in user_positions:
+    if count > MAX_UPDATES:
+      exit()
+
+    id = user_position.id
+    current_user = current_users[id]
+    current_user.x = user_position.x
+    current_user.y = user_position.y
+    current_user.date_time = user_position.date_time
+    current_user.velocity = user_position.velocity
+    current_user.distance = user_position.distance
+    current_user.oid = user_position.oid
+    
+    send_users([current_user.to_json()], 'updateFeatures')
