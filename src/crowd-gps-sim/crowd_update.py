@@ -45,17 +45,15 @@ def get_token(username, password, url):
         token = json.loads(data)        
         return token["token"]         
 
-def update_feature(feature, token):
+def send_features(features, request_url, token):
   params = urllib.parse.urlencode({'token': token, 'f': 'pjson'})
   headers = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/plain"}
-
-  features = [ feature ]
 
   features_json = json.dumps(features)
   if len(features_json) == 0:
     exit()
 
-  url = server + layer + 'updateFeatures'
+  url = server + layer + request_url
 
   response = requests.post(url, params=params, headers=headers, data={'features': features_json}, verify=False)
   if (response.status_code != 200):
@@ -88,15 +86,13 @@ def send_request(feature):
   user = lines[0].strip()
   passwd = lines[1].strip()
 
-  params = urllib.parse.urlencode({'username': user, 'password': passwd, 'client': 'requestip', 'f': 'json'})
-  headers = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/plain"}
-
-  feature_json = json.dumps(feature)
-  if len(feature_json) == 0:
-    exit()
+  features = []
+  for i in range(1, 10):
+    feature = create_feature(i, i)
+    features.append(feature)
 
   token = get_token(user, passwd, server)
-  update_feature(feature, token)
+  send_features(features, 'addFeatures', token)
 
 if __name__ == "__main__":
   feature = create_feature(1, 1)
