@@ -1,11 +1,11 @@
 crowd-size: 1000
 max-visits: 4
-pulse-resolution: 10
-pulse-resolution-error: 5
-meters-to-unit: 1
-location-error: 20
-start-time-range: 10
-vel: 1.4
+pulse-resolution: 0.08
+pulse-resolution-error: 0.1
+meters-to-unit: 0.1
+location-error: 50
+start-time-range: 1000
+vel: 0.9
 vel-error: 0.4
 start-date-year: 2016
 start-date-month: 6
@@ -13,8 +13,8 @@ start-date-day: 22
 start-date-hour: 10
 start-date-minute: 0
 start-date-second: 0
-wait-min: 10 
-wait-max: 200
+wait-min: 5 
+wait-max: 300
 starting-locations: 
   - Entrances
 points-of-interest:
@@ -23,3 +23,5 @@ points-of-interest:
   - Stages
   - Stages
   - Toilets
+  - Campsites
+  - Carparks

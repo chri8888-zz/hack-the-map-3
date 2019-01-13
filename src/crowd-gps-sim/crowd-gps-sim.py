@@ -52,7 +52,7 @@ def load_points_from_csv(name):
 
 
 def export(path, events):
-    route_stringer = "id,x,y,time,velocity,distance\n"
+    route_stringer = "id,x,y,time\n"  # ,velocity,distance\n"
     max = len(events)
 
     count = 0
@@ -74,7 +74,7 @@ def export(path, events):
         str_distance = str(str_distance)
 
         string_build = str_id + "," + str_x + "," + str_y + "," + \
-            str_time + "," + str_vel + "," + str_distance
+            str_time  # + "," + str_vel + "," + str_distance
         route_stringer += string_build + "\n"
 
     file = open(path, "w")
@@ -98,7 +98,7 @@ def load(path):
     # Crowd Size + max visits
     crowd_size = int(yaml_load["crowd-size"])
     max_visits = int(yaml_load["max-visits"])
-    pulse_resolution = int(yaml_load["pulse-resolution"])
+    pulse_resolution = float(yaml_load["pulse-resolution"])
     pulse_resolution_error = int(yaml_load["pulse-resolution-error"])
     m_to_unit = float(yaml_load["meters-to-unit"])
     location_error = float(yaml_load["location-error"])
@@ -154,23 +154,24 @@ for id in range(crowd_size):
         target_xy = tuple_addition(
             target_point, location_drift(location_error))
 
-        # Generate the number of GPS syncs
-        pulse_count = pulse_resolution + \
-            random.randrange(-pulse_resolution_error,
-                             pulse_resolution_error)
-
         # Interpolate across the path for pulse events
-        for pulse_index in range(pulse_count):
-            point = interpolate(previous_point, target_xy,
-                                random.uniform(0, 1))
+        distance = point_distance(target_xy, previous_point) * m_to_unit
+        pulse_count = distance * \
+            (pulse_resolution +
+             random.uniform(-pulse_resolution_error, pulse_resolution_error))
+
+        segment = 1.0 / pulse_count
+        for pulse_index in range(int(pulse_count)):
+            line_advance = (pulse_index * segment)
+            point = interpolate(previous_point, target_xy, line_advance)
             pulse_events.append(tuple_addition(
                 point, location_drift(location_error)))
 
         # Simulate wait
-        wait_loops = random.randrange(wait_min, wait_max)
-        for i in range(wait_loops):
+        radius = target_point[2]
+        wait_loops = (random.randrange(wait_min, wait_max) * radius) * 0.01
+        for i in range(int(wait_loops)):
             # Set point in radius
-            radius = target_point[2]
             wait_offset = location_drift(radius)
             wait_point = tuple_addition(
                 target_xy, wait_offset)

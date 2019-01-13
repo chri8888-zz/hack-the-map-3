@@ -9,8 +9,12 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.esri.arcgisruntime.geometry.Point;
+import com.esri.arcgisruntime.geometry.SpatialReference;
+import com.esri.arcgisruntime.geometry.SpatialReferences;
 import com.esri.arcgisruntime.mapping.ArcGISMap;
 import com.esri.arcgisruntime.mapping.Basemap;
+import com.esri.arcgisruntime.mapping.Viewpoint;
 import com.esri.arcgisruntime.mapping.view.MapView;
 
 public class MainActivity extends AppCompatActivity {
@@ -34,7 +38,16 @@ public class MainActivity extends AppCompatActivity {
         });
 
         mMapView = findViewById(R.id.mapView);
-        ArcGISMap map = new ArcGISMap(Basemap.Type.TOPOGRAPHIC, 34.056295, -117.195800, 16);
+
+
+        //ArcGISMap map = new ArcGISMap(Basemap.Type.TOPOGRAPHIC, 34.056295, -117.195800, 16);
+
+        // Set initial location
+        ArcGISMap map = new ArcGISMap(SpatialReferences.getWebMercator());
+        map.setBasemap(Basemap.createTopographic());
+
+        Point glasto_location = new Point(-290580.7608083967, 6649146.157472552, SpatialReferences.getWebMercator());
+        map.setInitialViewpoint(new Viewpoint(glasto_location, 20000));
         mMapView.setMap(map);
     }
 
