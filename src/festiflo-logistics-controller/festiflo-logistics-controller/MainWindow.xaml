@@ -6,7 +6,8 @@
         xmlns:esri="http://schemas.esri.com/arcgis/runtime/2013"
         xmlns:local="clr-namespace:festiflo_logistics_controller"
         mc:Ignorable="d"
-        Title="FestiFlo MS" Height="650" Width="900" Background="#fd78adff" Foreground="#4551c7ff " BorderBrush="#ffe552ff">
+        Title="FestiFlo MS" Height="650" Width="900" Background="#fd78adff" Foreground="#4551c7ff " BorderBrush="#ffe552ff"
+        PreviewMouseMove="Window_PreviewMouseMove">
   <Window.Resources>
     <local:MapViewModel x:Key="MapViewModel" />
   </Window.Resources>
@@ -38,18 +39,24 @@
           <Label.Content>FestiFlo</Label.Content>
         </Label>
         <!-- -->
+
+        <Border  x:Name="_border" Visibility="Collapsed"
+                 DataContext="{StaticResource MapViewModel}"/>
         <Border Grid.Row="1" Margin="6, 3, 6, 3" Width="Auto" Height="Auto">
           <StackPanel Orientation="Vertical" Height="Auto">
             <TextBlock Text="Event Title" Width="Auto" Foreground="Black" HorizontalAlignment="Left"/>
-            <TextBox x:Name="TitleField" MinWidth="100" MaxWidth="200" HorizontalAlignment="Left"/>
+            <TextBox x:Name="TitleField" MinWidth="100" MaxWidth="200" HorizontalAlignment="Left"
+                     Text="{Binding EventManagerViewModel.EventTitle, Source={StaticResource MapViewModel}}"/>
             
             <TextBlock Margin="0,6,0,0" Text="Event Description" Foreground="Black" 
                        Height="Auto"  MaxWidth="100" HorizontalAlignment="Left"/>
-            <TextBox x:Name="DescField" MinHeight="200" Height="Auto" TextWrapping="Wrap"/>
+            <TextBox x:Name="DescField" MinHeight="200" Height="Auto" TextWrapping="Wrap"
+                     Text="{Binding EventManagerViewModel.EventDescription, Source={StaticResource MapViewModel}}"/>
             
             <StackPanel Orientation="Horizontal" Margin="0, 3,0,0">
               <Button x:Name="LocationButton" Width="120" Height="25"
-                      Content="Set Location"  Margin="6,0,0,0"/>
+                      Content="Set Location"  Margin="6,0,0,0" 
+                      Click="LocationButton_Click"/>
               <Button x:Name="SendEventButton" Width="120" Height="25"
                       Content="Send Event" />
             </StackPanel>
@@ -73,7 +80,8 @@
               Background="Gray" 
               ShowsPreview="True"
               Width="5" />
-      <esri:MapView x:Name="EsriMapView" 
+      <esri:MapView x:Name="EsriMapView"
+                    MouseLeftButtonDown="MapView_LeftMouseDown"
                     Grid.Column="2" Map="{Binding Map, Source={StaticResource MapViewModel}}" />
 
     </Grid>

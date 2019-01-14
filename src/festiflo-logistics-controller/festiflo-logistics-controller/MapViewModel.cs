@@ -37,6 +37,13 @@ namespace festiflo_logistics_controller
     {
       get { return _stafflocationsViewModel; }
     }
+
+    private EventsManagerViewModel _eventManagerVM = new EventsManagerViewModel();
+    public EventsManagerViewModel EventManagerViewModel
+    {
+      get => _eventManagerVM;
+    }
+
     public MapViewModel()
     {
       LoadHeatMap();
@@ -133,7 +140,6 @@ namespace festiflo_logistics_controller
       _stafflocationsViewModel.UpdateUserCounts(users);
 
       GeomCount = "At first poly: " + DataUtils.GetContainedCount(users, JohnPeelGeometry, 200).ToString();
-
     }
 
     public void loadfullMap()
@@ -178,7 +184,6 @@ namespace festiflo_logistics_controller
       }
     }
     #endregion
-
 
     #region Utils
 
@@ -315,5 +320,94 @@ namespace festiflo_logistics_controller
       }
     }
 
+  }
+
+  public class EventsManagerViewModel : INotifyPropertyChanged
+  {
+    public EventsManagerViewModel()
+    {
+      InitializeAsync();
+    }
+
+    /// <summary>
+    /// Raises the <see cref="EventsManagerViewModel.PropertyChanged" /> event
+    /// </summary>
+    /// <param name="propertyName">The name of the property that has changed</param>
+    protected void NotifyPropertyChanged([CallerMemberName] string propertyName = null)
+    {
+      PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+    public event PropertyChangedEventHandler PropertyChanged;
+
+    private void InitializeAsync()
+    {
+
+    }
+
+    public enum EventType
+    {
+      Information = 0,
+      Warning = 1,
+      Closure = 2
+    }
+
+    #region Event Props
+    private List<EventViewModel> _activeEvents = new List<EventViewModel>();
+
+    private string _eventTitle = "";
+    public string EventTitle
+    {
+      get => _eventTitle;
+      set
+      {
+        _eventTitle = value;
+        NotifyPropertyChanged(nameof(EventTitle));
+      }
+    }
+
+    private string _eventDesc = "";
+    public string EventDescription
+    {
+      get => _eventDesc;
+      set
+      {
+        _eventDesc = value;
+        NotifyPropertyChanged(nameof(EventDescription));
+      }
+    }
+
+    private MapPoint _eventLocation = new MapPoint(0, 0);
+    public MapPoint EventLocation
+    {
+      get => _eventLocation;
+      set
+      {
+        _eventLocation = value;
+        NotifyPropertyChanged(nameof(EventLocation));
+      }
+    }
+
+    // Event timer
+    // Event symbol
+    #endregion
+  }
+
+  public class EventViewModel
+  {
+    public string Title { get; private set; }
+    public string Description { get; private set; }
+    public MapPoint Location { get; private set; }
+    public EventsManagerViewModel.EventType Type { get; private set; }
+    //timer
+    //type
+
+    public EventViewModel(string title, string desc, MapPoint location, EventsManagerViewModel.EventType type = EventsManagerViewModel.EventType.Information)
+    {
+      Title = title;
+      Description = desc;
+      Location = location;
+      Type = type;
+    }
   }
 }
