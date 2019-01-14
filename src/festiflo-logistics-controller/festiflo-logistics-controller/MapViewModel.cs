@@ -39,6 +39,13 @@ namespace festiflo_logistics_controller
     {
       get { return _stafflocationsViewModel; }
     }
+
+    private EventsManagerViewModel _eventManagerVM = new EventsManagerViewModel();
+    public EventsManagerViewModel EventManagerViewModel
+    {
+      get => _eventManagerVM;
+    }
+
     public MapViewModel()
     {
       LoadHeatMap();
@@ -87,7 +94,7 @@ namespace festiflo_logistics_controller
       set { geomCount = value; }
     }
 
-    private DataUtils.ColorPalletteType _heatMapColor = DataUtils.ColorPalletteType.Blues;
+    private DataUtils.ColorPalletteType _heatMapColor = DataUtils.ColorPalletteType.Heat;
     public DataUtils.ColorPalletteType HeatMapColorPallette
     {
       get => _heatMapColor;
@@ -95,6 +102,7 @@ namespace festiflo_logistics_controller
       {
         _heatMapColor = value;
         OnPropertyChanged(nameof(HeatMapColorPallette));
+        reloadHeatMap();
       }
     }
 
@@ -113,12 +121,12 @@ namespace festiflo_logistics_controller
 
     public async void LoadHeatMap()
     {
-      await DataUtils.AddOperationalLayerAsync(_map, _userDataUrl, DataUtils.GetHeatmapRenderer(colorStops: DataUtils.GetColorStops(_heatMapColor)));
+      await DataUtils.AddOperationalLayerAsync(_map, _userDataUrl, DataUtils.GetHeatmapRenderer(type:_heatMapColor));
     }
 
     public async void ReloadLayers()
     {
-      await DataUtils.AddOperationalLayerAsync(_map, _userDataUrl, DataUtils.GetHeatmapRenderer(colorStops: DataUtils.GetColorStops(_heatMapColor)));
+      await DataUtils.AddOperationalLayerAsync(_map, _userDataUrl, DataUtils.GetHeatmapRenderer(type:_heatMapColor));
       await DataUtils.AddOperationalLayerAsync(_map, _campsitesURL);
       await DataUtils.AddOperationalLayerAsync(_map, _carParksURL);
       await DataUtils.AddOperationalLayerAsync(_map, _toiletsURL);
@@ -139,7 +147,7 @@ namespace festiflo_logistics_controller
 
     public void reloadHeatMap()
     {
-      DataUtils.AddOrReplaceOperationalLayerAsync(_map, _userDataUrl, DataUtils.GetHeatmapRenderer());
+      DataUtils.AddOrReplaceOperationalLayerAsync(_map, _userDataUrl, DataUtils.GetHeatmapRenderer(type: HeatMapColorPallette));
       updateStaffUserCounts();
     }
 
@@ -184,7 +192,6 @@ namespace festiflo_logistics_controller
       }
     }
     #endregion
-
 
     #region Utils
 
@@ -398,5 +405,134 @@ namespace festiflo_logistics_controller
       }
     }
 
+  }
+
+  public class EventsManagerViewModel : INotifyPropertyChanged
+  {
+    public EventsManagerViewModel(){ }
+
+    /// <summary>
+    /// Raises the <see cref="EventsManagerViewModel.PropertyChanged" /> event
+    /// </summary>
+    /// <param name="propertyName">The name of the property that has changed</param>
+    protected void NotifyPropertyChanged([CallerMemberName] string propertyName = null)
+    {
+      PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+    public event PropertyChangedEventHandler PropertyChanged;
+
+    public enum EventType
+    {
+      Information = 0,
+      Warning = 1,
+      Closure = 2
+    }
+
+    #region Event Props
+    private List<EventViewModel> _activeEvents = new List<EventViewModel>();
+
+    private string _eventTitle = "";
+    public string EventTitle
+    {
+      get => _eventTitle;
+      set
+      {
+        _eventTitle = value;
+        NotifyPropertyChanged(nameof(EventTitle));
+        NotifyPropertyChanged(nameof(CanSendEvent));
+      }
+    }
+
+    private string _eventDesc = "";
+    public string EventDescription
+    {
+      get => _eventDesc;
+      set
+      {
+        _eventDesc = value;
+        NotifyPropertyChanged(nameof(EventDescription));
+        NotifyPropertyChanged(nameof(CanSendEvent));
+      }
+    }
+
+    private MapPoint _eventLocation = null;
+    public MapPoint EventLocation
+    {
+      get => _eventLocation;
+      set
+      {
+        _eventLocation = value;
+        NotifyPropertyChanged(nameof(EventLocation));
+        NotifyPropertyChanged(nameof(CanSendEvent));
+      }
+    }
+
+    private EventType _eventType = EventType.Information;
+    public EventType SelectedEventType
+    {
+      get => _eventType;
+      set
+      {
+        _eventType = value;
+        NotifyPropertyChanged(nameof(SelectedEventType));
+        NotifyPropertyChanged(nameof(CanSendEvent));
+      }
+    }
+
+    public bool CanSendEvent
+    {
+      get
+      {
+        if (_eventTitle != "" && _eventDesc != "" && _eventLocation != null)
+          return true;
+        return false;
+      }
+    }
+
+    // Event timer
+    // Event symbol
+    #endregion
+
+    #region commands
+    private DelegateCommand _sendEventCommand;
+    public ICommand SendEventCmd
+    {
+      get
+      {
+        if (_sendEventCommand == null)
+          _sendEventCommand = new DelegateCommand(new Action(SendEvent));
+        return _sendEventCommand;
+      }
+    }
+    #endregion
+
+    private void SendEvent()
+    {
+      // do stuff with 
+      var newEvent = new EventViewModel(_eventTitle, _eventDesc, _eventLocation, _eventType);
+
+      EventTitle = "";
+      EventDescription = "";
+      EventLocation = null;
+    }
+  }
+
+  public class EventViewModel
+  {
+    public string Title { get; set; }
+    public string Description { get; set; }
+    public MapPoint Location { get; set; }
+    public EventsManagerViewModel.EventType Type { get; set; }
+    //timer
+    //type
+
+    public EventViewModel(string title, string desc, MapPoint location, EventsManagerViewModel.EventType type = EventsManagerViewModel.EventType.Information)
+    {
+      Title = title;
+      Description = desc;
+      Location = location;
+      Type = type;
+    }
   }
 }

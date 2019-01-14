@@ -6,7 +6,9 @@
         xmlns:esri="http://schemas.esri.com/arcgis/runtime/2013"
         xmlns:local="clr-namespace:festiflo_logistics_controller"
         mc:Ignorable="d"
-        Title="FestiFlo MS" WindowState="Maximized" Height="650" Width="900" Background="#fd78adff" Foreground="#4551c7ff " BorderBrush="#ffe552ff">
+        Title="FestiFlo MS" Height="650" Width="900" 
+        Background="#4551c7" Foreground="#4551c7" BorderBrush="#ffe552ff" WindowState="Maximized"
+        PreviewMouseMove="Window_PreviewMouseMove">
   <Window.Resources>
     <local:MapViewModel x:Key="MapViewModel" />
   </Window.Resources>
@@ -32,23 +34,56 @@
           <RowDefinition Height="Auto"/>
           <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <Label Grid.Row="0" FontFamily="Tahoma" FontSize="24">
-          <Label.Effect>
-            <DropShadowEffect BlurRadius="10" ShadowDepth="0" Opacity="1" 
-                      Color="White"/>
-          </Label.Effect>
-          <Label.Content>FestiFlo</Label.Content>
-        </Label>
-        <CheckBox Grid.Row ="1" Margin="10" 
-                  IsChecked="{Binding AutoRefresh, Source={StaticResource MapViewModel}, Mode=TwoWay}" >
-          Auto refresh
-        </CheckBox>
-        <Button Grid.Row="2" Margin="10"
-              Content="Refresh heat map"
-              Width="120" Height="25"
-              Command="{Binding ReloadHeatMapCommand, Source={StaticResource MapViewModel}}"/>
+        <Image x:Name="LogoImage" Grid.Row="0" Margin="0, 10,0,0"/>
+        <!-- -->
 
-        <Button Grid.Row="3" Margin="10"
+        <Border  x:Name="_border" Visibility="Collapsed"
+                 DataContext="{StaticResource MapViewModel}"/>
+        <Border HorizontalAlignment="Left" Grid.Row="1" Margin="6, 40, 6, 3" Width="Auto" Height="Auto">
+          <StackPanel Orientation="Vertical" Height="Auto">
+            <TextBlock Text="Event Type" FontSize="14"  Width="Auto" Foreground="Black" HorizontalAlignment="Left"/>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+              <RadioButton x:Name="RadioButtonInfo" IsChecked="True" Background="LightBlue" Content="Information" Click="RadioButtonInfo_Click"/>
+              <RadioButton x:Name="RadioButtonWarning" Background="Gold" Content="Warning" Margin="6,0,0,0" Click="RadioButtonWarning_Click"/>
+              <RadioButton x:Name="RadioButtonClosure" Background="Red" Content="Closure" Margin="6,0,0,0" Click="RadioButtonClosure_Click"/>
+            </StackPanel>
+            <TextBlock Text="Event Title" FontSize="14" Width="Auto" Foreground="Black" HorizontalAlignment="Left"/>
+            <TextBox x:Name="TitleField" MinWidth="100" MaxWidth="200" HorizontalAlignment="Left"
+                     Text="{Binding EventManagerViewModel.EventTitle, Source={StaticResource MapViewModel}}"/>
+
+            <TextBlock Margin="0,6,0,0" FontSize="14" Text="Event Description" Foreground="Black" 
+                       Height="Auto" HorizontalAlignment="Left"/>
+            <TextBox x:Name="DescField" MinHeight="200" Height="Auto" TextWrapping="Wrap"
+                     Text="{Binding EventManagerViewModel.EventDescription, Source={StaticResource MapViewModel}}"/>
+            
+            <StackPanel Orientation="Horizontal" Margin="0, 3,0,0">
+              <Button x:Name="LocationButton" Width="120" Height="25"
+                      Content="Set Location"  Margin="6,0,0,0" 
+                      Click="LocationButton_Click"/>
+              <Button x:Name="SendEventButton" Width="120" Height="25"
+                      Content="Send Event" IsEnabled="{Binding EventManagerViewModel.CanSendEvent, Source={StaticResource MapViewModel}}"
+                      Command="{Binding EventManagerViewModel.SendEventCmd, Source={StaticResource MapViewModel}}"/>
+            </StackPanel>
+          </StackPanel>
+        </Border>
+        <!-- -->
+        <Border Grid.Row="2" Width="Auto" Height="Auto" MinHeight="40"/>
+        <StackPanel Grid.Row="3" Margin="6,6,0,0" Orientation="Vertical" >
+          <TextBlock Text="Heat Map" FontSize="14" Foreground="Black" Width="Auto" Height="Auto"/>
+          <StackPanel Orientation="Horizontal">
+          <Button Content="Refresh" Margin="0,0,6,0"
+                Width="120" Height="25"
+                Command="{Binding ReloadHeatMapCommand, Source={StaticResource MapViewModel}}"/>
+            <ComboBox x:Name="HeatMapColor"
+                Width="Auto" Height="25"
+                SelectionChanged="ComboBox_SelectionChanged">
+              <ComboBoxItem IsSelected="True" Name="Heat">Heat</ComboBoxItem>
+              <ComboBoxItem Name="Blues">Blues</ComboBoxItem>
+            </ComboBox>
+          </StackPanel>
+        </StackPanel>
+
+        <Button Grid.Row="4" Margin="0,40,0,0"
               Content="Load data"
               Width="120" Height="25"
               Command="{Binding LoadFullMapCommand, Source={StaticResource MapViewModel}}"/>
@@ -59,14 +94,15 @@
         <ListBox Grid.Row="5" ItemsSource="{Binding StafflocationsViewModel.StaffMoveHistory, Source={StaticResource MapViewModel}}" Height="150"/>
         <!--<TextBlock Grid.Row="2" Text="{Binding GeometryString, Source={StaticResource MapViewModel}}" TextWrapping="Wrap"/>-->
       
-        </Grid>
+      </Grid>
       <GridSplitter Grid.Column="1"
               HorizontalAlignment="Center"
               VerticalAlignment="Stretch"
               Background="Gray" 
               ShowsPreview="True"
               Width="5" />
-      <esri:MapView x:Name="EsriMapView"
+      <esri:MapView x:Name="EsriMapView" 
+                    MouseLeftButtonDown="MapView_LeftMouseDown"
                     Grid.Column="2" Map="{Binding Map, Source={StaticResource MapViewModel}}" />
 
     </Grid>
