@@ -13,7 +13,7 @@ namespace festiflo_logistics_controller
 {
   internal class StaffMember
   {
-    public int OID { get; set; }
+    public int OID { get; private set; }
     public int ID { get; set; }
     public string Name { get; set; }
     public double X { get; set; }
@@ -100,7 +100,7 @@ namespace festiflo_logistics_controller
 
   internal class EventData
   {
-    public int OID { get; set; }
+    public int OID { get; private set; }
     public int ID { get; set; }
     public string Name { get; set; }
     public string Description { get; set; }
@@ -247,11 +247,11 @@ namespace festiflo_logistics_controller
       if (string.IsNullOrEmpty(json))
         return staffList;
 
-      var tokenResult = JObject.Parse(json);
-      if (tokenResult == null)
+      var staffListJSON = JObject.Parse(json);
+      if (staffListJSON == null)
         return staffList;
 
-      var users = tokenResult.GetValue("features") as JArray;
+      var users = staffListJSON.GetValue("features") as JArray;
       if (users == null || users.Count == 0)
         return staffList;
       
@@ -291,6 +291,98 @@ namespace festiflo_logistics_controller
 
       var content = new FormUrlEncodedContent(postParams);
       await httpClient.PostAsync(_cardiffServer + _staffLayer + "addFeatures", content);
+    }
+
+    public async Task CreateEvent(EventData eventData)
+    {
+      if (eventData == null)
+        return;
+
+      string eventJson = "[" + eventData.ToJSON() + "]";
+
+      var token = await GetToken();
+      if (string.IsNullOrEmpty(token))
+        return;
+
+      var postParams = new Dictionary<string, string>()
+      {
+        { "token", token },
+        { "f", "pjson" },
+        { "features", eventJson }
+      };
+
+      var content = new FormUrlEncodedContent(postParams);
+      await httpClient.PostAsync(_cardiffServer + _eventLayer + "addFeatures", content);
+    }
+
+    public async Task DeleteEvent(int eventID)
+    {
+      var events = await QueryEvents("id = " + eventID);
+      if (events == null || events.Count < 1)
+        return;
+
+      int objectID = events.FirstOrDefault().OID;
+
+      var token = await GetToken();
+      if (string.IsNullOrEmpty(token))
+        return;
+
+      var postParams = new Dictionary<string, string>()
+      {
+        { "token", token },
+        { "f", "pjson" },
+        { "where", "oid = " + objectID.ToString() }
+      };
+
+      var content = new FormUrlEncodedContent(postParams);
+      await httpClient.PostAsync(_cardiffServer + _eventLayer + "deleteFeatures", content);
+    }
+
+    public async Task<List<EventData>> QueryEvents(string whereClause = "")
+    {
+      var token = await GetToken();
+      if (string.IsNullOrEmpty(token))
+        return null;
+
+      if (string.IsNullOrEmpty(whereClause))
+        whereClause = "oid > 0";
+
+      var postParams = new Dictionary<string, string>()
+      {
+        { "token", token },
+        { "f", "pjson" },
+        { "where", whereClause },
+        { "outfields", "*" }
+      };
+
+      var content = new FormUrlEncodedContent(postParams);
+      var result = await httpClient.PostAsync(_cardiffServer + _eventLayer + "query", content);
+      if (result.StatusCode != System.Net.HttpStatusCode.OK || result.Content == null)
+        return null;
+
+      string json = await result.Content.ReadAsStringAsync();
+      if (string.IsNullOrEmpty(json))
+        return null;
+
+      var eventListJSON = JObject.Parse(json);
+      if (eventListJSON == null)
+        return null;
+
+      var events = eventListJSON.GetValue("features") as JArray;
+      if (events == null || events.Count == 0)
+        return null;
+
+      var eventList = new List<EventData>();
+      foreach (var eventData in events)
+      {
+        var eventStruct = EventData.fromJSON(eventData as JObject);
+        if (eventStruct == null)
+          continue;
+
+        eventList.Add(eventStruct);
+      }
+
+      return eventList;
     }
 
     public RestRequest()
