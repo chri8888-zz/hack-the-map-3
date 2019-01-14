@@ -2,23 +2,23 @@ import http.client
 import urllib
 import json
 import requests
-import arcpy
+#import arcpy
 import datetime
 import time
 
 requests.packages.urllib3.disable_warnings() 
 
 server = 'https://cardiffportal.esri.com'
-layer = '/server/rest/services/Hosted/FestiFeatureService/FeatureServer/0/'
+layer = '/server/rest/services/Hosted/FestiFlowUserService/FeatureServer/0/'
 port = 6443
 
 USER_COUNT = 1000
 MAX_UPDATES = 10000
-CSV_FILE = 'output-crowd-sim-GOOD-converted.csv'
-SIMULATION_SPEED_FACTOR = 1
+CSV_FILE = 'output-crowd-sim-GOOD.csv'
+SIMULATION_SPEED_FACTOR = 3
 
-inSR = arcpy.SpatialReference(3857)
-outSR = arcpy.SpatialReference(4326)
+# inSR = arcpy.SpatialReference(3857)
+# outSR = arcpy.SpatialReference(4326)
 
 class User():
   def __init__(self, track_id, x = 0.0, y = 0.0, date_time = None, velocity = 0.0, distance = 0.0, oid = None):
@@ -120,9 +120,10 @@ def edit_users(features):
   http_post(url, {'updates': features_json})
 
 def create_users():
+  starting_users = read_csv('output_crowd-sim-starting.csv')
   users = []
   for i in range(0, USER_COUNT):
-    user = User(i)
+    user = starting_users[i]
     users.append(user.to_json())
 
   send_users(users, 'addFeatures')  
@@ -165,14 +166,14 @@ def query_users():
 
   return user_records
 
-def convert_point(x, y):
-  pt = arcpy.Point()
-  pt.X = x
-  pt.Y = y
-  pt_geo = arcpy.PointGeometry(pt, inSR)
-  pt_geo1 = pt_geo.projectAs(outSR)
-  pt1 = pt_geo1.lastPoint
-  return [pt1.X, pt1.Y]
+# def convert_point(x, y):
+#   pt = arcpy.Point()
+#   pt.X = x
+#   pt.Y = y
+#   pt_geo = arcpy.PointGeometry(pt, inSR)
+#   pt_geo1 = pt_geo.projectAs(outSR)
+#   pt1 = pt_geo1.lastPoint
+#   return [pt1.X, pt1.Y]
 
 def read_csv(filename):
   f = open(filename, 'r')
@@ -251,6 +252,7 @@ if __name__ == "__main__":
 
   while len(user_positions) > 0:
     if count > MAX_UPDATES:
+      print("Finished")
       exit()
 
     user_position = user_positions[0]
