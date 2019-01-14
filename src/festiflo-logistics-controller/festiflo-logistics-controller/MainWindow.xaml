@@ -54,6 +54,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
           </Grid.RowDefinitions>
           <Image x:Name="LogoImage" Grid.Row="0" Margin="0, 10,0,0"/>
@@ -114,10 +115,14 @@
               Width="120" Height="25"
               Command="{Binding LoadFullMapCommand, Source={StaticResource MapViewModel}}"/>
           <Button Grid.Row="4" Margin="10"
-              Content="Move staff"
-              Width="120" Height="25"
-              Command="{Binding MoveStaffCommand, Source={StaticResource MapViewModel}}"/>
-          <ListBox Grid.Row="5" ItemsSource="{Binding StafflocationsViewModel.StaffMoveHistory, Source={StaticResource MapViewModel}}" Height="150"/>
+                  Content="Move staff"
+                  Width="120" Height="25"
+                  Click="StaffMoveButton_Click"/>
+          <CheckBox Grid.Row="5" Margin="10" 
+                  IsChecked="False" Click="StaffCheckBox_Click">
+            Show staff
+          </CheckBox>
+          <ListBox Grid.Row="6" ItemsSource="{Binding StafflocationsViewModel.StaffMoveHistory, Source={StaticResource MapViewModel}}" Height="150"/>
           <!--<TextBlock Grid.Row="2" Text="{Binding GeometryString, Source={StaticResource MapViewModel}}" TextWrapping="Wrap"/>-->
 
         </Grid>

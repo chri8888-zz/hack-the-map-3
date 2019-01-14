@@ -34,7 +34,7 @@ namespace festiflo_logistics_controller
     private Window _dragAdorner = null;
     private bool _eventPlacementMode = false;
 
-    private SimpleMarkerSymbol _infoSymbol = 
+    private SimpleMarkerSymbol _infoSymbol =
       new SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Circle, System.Drawing.Color.LightBlue, 12);
 
     private SimpleMarkerSymbol _warningSymbol =
@@ -120,7 +120,7 @@ namespace festiflo_logistics_controller
           }
 
           _eventPlacementMode = false;
-        } 
+        }
       }
     }
 
@@ -242,6 +242,60 @@ namespace festiflo_logistics_controller
           mapVM.HeatMapColorPallette = DataUtils.ColorPalletteType.Blues;
       }
     }
+
+    private List<Graphic> StaffGraphics = new List<Graphic>();
+    private void StaffCheckBox_Click(object sender, RoutedEventArgs e)
+    {
+      if (StaffGraphics.Count() == 0)
+        AddStaffGraphics();
+      else
+        ClearStaffGraphics();
+    }
+
+    private void StaffMoveButton_Click(object sender, RoutedEventArgs e)
+    {
+      _mapVM.MoveStaffCommand.Execute(sender);
+      ClearStaffGraphics();
+      AddStaffGraphics();
+    }
+
+    private void AddStaffGraphics()
+    {
+      foreach (var loc in _mapVM?.StafflocationsViewModel?.Locations)
+      {
+        SimpleMarkerSymbol marker = new SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Circle, System.Drawing.Color.LightYellow, loc.CurrentStaffing > 20 ? loc.CurrentStaffing : 20);
+
+        var textSym = new TextSymbol()
+        {
+          Text = loc.CurrentStaffing.ToString(),
+          Color = System.Drawing.Color.DarkViolet,
+          HaloColor = System.Drawing.Color.White,
+          HaloWidth = 2,
+          Size = loc.CurrentStaffing > 20 ? loc.CurrentStaffing : 20,
+          HorizontalAlignment = Esri.ArcGISRuntime.Symbology.HorizontalAlignment.Left,
+          VerticalAlignment = Esri.ArcGISRuntime.Symbology.VerticalAlignment.Bottom
+        };
+
+        var markerGraphic = new Graphic(loc.Geometry?.Extent?.GetCenter(), marker);
+        var textGraphic = new Graphic(loc.Geometry?.Extent?.GetCenter(), textSym);
+        if (_clickEventOverlay != null)
+        {
+          _clickEventOverlay.Graphics.Add(markerGraphic);
+          StaffGraphics.Add(markerGraphic);
+          _clickEventOverlay.Graphics.Add(textGraphic);
+          StaffGraphics.Add(textGraphic);
+        }
+      }
+    }
+
+    private void ClearStaffGraphics()
+    {
+      foreach (var staffGraphic in StaffGraphics)
+        _clickEventOverlay.Graphics.Remove(staffGraphic);
+
+      StaffGraphics = new List<Graphic>();
+    }
+
 
     // Map initialization logic is contained in MapViewModel.cs
   }

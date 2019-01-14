@@ -18,6 +18,7 @@ using System.Windows.Media;
 using System.Windows.Input;
 using System.Collections.ObjectModel;
 using System.Threading;
+using System.Diagnostics;
 
 namespace festiflo_logistics_controller
 {
@@ -312,6 +313,8 @@ namespace festiflo_logistics_controller
           StaffMoveHistory.Insert(0, DateTime.Now + " - " + loc.Name + ": " + movingStaff + " staff from staff room.");
           loc.CurrentStaffing += movingStaff;
           staffRoom.CurrentStaffing -= movingStaff;
+          //Debug.Assert(staffRoom.CurrentStaffing == staffRoom.StaffMembers.Count());
+          //Debug.Assert(loc.CurrentStaffing == loc.StaffMembers.Count());
         }
         else if (loc.CurrentStaffing == 0)
         {
@@ -321,6 +324,8 @@ namespace festiflo_logistics_controller
           bestLoc.CurrentStaffing--;
           StaffMoveHistory.Insert(0, DateTime.Now + " - " + loc.Name + ": " + 1 + " staff added.");
           loc.CurrentStaffing++;
+          //Debug.Assert(bestLoc.CurrentStaffing == bestLoc.StaffMembers.Count());
+          //Debug.Assert(loc.CurrentStaffing == loc.StaffMembers.Count());
         }
         if (freeStaff == 0 && StaffMoveHistory.Count != 0 && !StaffMoveHistory[0].Contains("No more free staff"))
           StaffMoveHistory.Insert(0, DateTime.Now + " - No more free staff");
@@ -335,6 +340,9 @@ namespace festiflo_logistics_controller
         loc.CurrentStaffing += loc.StaffNeeded;
         var staffRoom = Locations.Where(location => location.LocationType == LocationType.StaffRoom).FirstOrDefault();
         staffRoom.CurrentStaffing -= loc.StaffNeeded;
+
+        //Debug.Assert(staffRoom.CurrentStaffing == staffRoom.StaffMembers.Count());
+        //Debug.Assert(loc.CurrentStaffing == loc.StaffMembers.Count());
       }
     }
 
@@ -388,6 +396,14 @@ namespace festiflo_logistics_controller
           OnPropertyChanged(nameof(Understaffed));
         }
       }
+
+      private List<StaffMember> _staffMembers;
+      internal List<StaffMember> StaffMembers
+      {
+        get { return _staffMembers; }
+        set { _staffMembers = value; }
+      }
+
       int _userCount = 0;
       public int UserCount
       {
