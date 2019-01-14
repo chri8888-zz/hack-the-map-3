@@ -118,7 +118,7 @@
                   Content="Move staff"
                   Width="120" Height="25"
                   Click="StaffMoveButton_Click"/>
-          <CheckBox Grid.Row="5" Margin="10" 
+          <CheckBox Grid.Row="5" Margin="10" Name="ShowStaffCheckbox"
                   IsChecked="False" Click="StaffCheckBox_Click">
             Show staff
           </CheckBox>

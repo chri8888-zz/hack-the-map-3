@@ -246,7 +246,7 @@ namespace festiflo_logistics_controller
     private List<Graphic> StaffGraphics = new List<Graphic>();
     private void StaffCheckBox_Click(object sender, RoutedEventArgs e)
     {
-      if (StaffGraphics.Count() == 0)
+      if (ShowStaffCheckbox?.IsChecked ?? false)
         AddStaffGraphics();
       else
         ClearStaffGraphics();
@@ -255,8 +255,13 @@ namespace festiflo_logistics_controller
     private void StaffMoveButton_Click(object sender, RoutedEventArgs e)
     {
       _mapVM.MoveStaffCommand.Execute(sender);
-      ClearStaffGraphics();
-      AddStaffGraphics();
+      if (ShowStaffCheckbox?.IsChecked ?? false)
+      {
+        ClearStaffGraphics();
+        AddStaffGraphics();
+      }
+
+
     }
 
     private void AddStaffGraphics()
