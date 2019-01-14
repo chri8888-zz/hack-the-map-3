@@ -2,6 +2,7 @@ package com.festiflo.festiflow_minion;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -31,6 +32,7 @@ import com.esri.arcgisruntime.mapping.Viewpoint;
 import com.esri.arcgisruntime.mapping.view.LocationDisplay;
 import com.esri.arcgisruntime.mapping.view.MapView;
 
+import java.net.URL;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -48,15 +50,15 @@ public class MainActivity extends AppCompatActivity {
     private Stopwatch mGPSDelta = new Stopwatch();
     private PointCollection mPointsBuffer = new PointCollection(SpatialReferences.getWgs84());
 
-    private MyAsyncTask myAsyncTask;
-
-    private class MyAsyncTask extends AsyncTask<Integer, Integer, Integer>{
-        @Override
-        protected Integer doInBackground(Integer... inputParams) {
-            mRester.updateUserPostion(13,0,0);
-            return 0;
-        }
-    }
+    //private MyAsyncTask myAsyncTask;
+//
+    //private class MyAsyncTask extends AsyncTask<Integer, Integer, Integer>{
+    //    @Override
+    //    protected Integer doInBackground(Integer... inputParams) {
+    //        mRester.updateUserPostion(13,0,0);
+    //        return 0;
+    //    }
+    //}
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,9 +72,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 mLocationDisplay.setAutoPanMode(LocationDisplay.AutoPanMode.RECENTER);
-
-                myAsyncTask = new MyAsyncTask();
-                myAsyncTask.execute(10);
             }
         });
 
@@ -81,12 +80,11 @@ public class MainActivity extends AppCompatActivity {
         // Set initial location
         ArcGISMap map = new ArcGISMap(SpatialReferences.getWebMercator());
         map.setBasemap(Basemap.createImageryWithLabels());
-        //Point glasto_location = new Point(-290580.7608083967, 6649146.157472552, SpatialReferences.getWebMercator());
-        //map.setInitialViewpoint(new Viewpoint(glasto_location, 20000));
+        Point glasto_location = new Point(-290580.7608083967, 6649146.157472552, SpatialReferences.getWebMercator());
+        map.setInitialViewpoint(new Viewpoint(glasto_location, 20000));
         //map.setInitialViewpoint(new Viewpoint(new Point(-13176752, 4090404, SpatialReferences.getWebMercator()), 500000));
 
         // add the layers to the map
-        /*
         map.getOperationalLayers().add(new FeatureLayer(new ServiceFeatureTable(
                 getResources().getString(R.string.url_campsites))));
         map.getOperationalLayers().add(new FeatureLayer(new ServiceFeatureTable(
@@ -97,16 +95,27 @@ public class MainActivity extends AppCompatActivity {
                 getResources().getString(R.string.url_toilets))));
         map.getOperationalLayers().add(new FeatureLayer(new ServiceFeatureTable(
                 getResources().getString(R.string.url_stages))));
-        map.getOperationalLayers().add(new FeatureLayer(new ServiceFeatureTable(
-                getResources().getString(R.string.url_events))));
-                */
+
+        try {
+
+            map.getOperationalLayers().add(new FeatureLayer(new ServiceFeatureTable(
+                    getResources().getString(R.string.url_users))));
+        }
+        catch(Exception e)
+        {
+            float i= 0;
+        }
+
+        //Uri uri = new Uri(getResources().getString(R.string.url_events));
+        //URL url = new URL(getResources().getString(R.string.url_events));
+        // map.getOperationalLayers().add(new FeatureLayer(url));
+
 
         mMapView.setMap(map);
 
         // get the MapView's LocationDisplay
         mLocationDisplay = mMapView.getLocationDisplay();
         mLocationDisplay.setAutoPanMode(LocationDisplay.AutoPanMode.COMPASS_NAVIGATION);
-        mLocationDisplay.startAsync();
 
         // Listen to changes in the status of the location data source.
         mLocationDisplay.addDataSourceStatusChangedListener(new LocationDisplay.DataSourceStatusChangedListener() {
@@ -148,12 +157,18 @@ public class MainActivity extends AppCompatActivity {
             public void onLocationChanged(LocationDisplay.LocationChangedEvent locationChangedEvent) {
 
                 // Get the current location of the gps
-                Point location = mLocationDisplay.getLocation().getPosition();
+                try {
+                    Point location = mLocationDisplay.getLocation().getPosition();
 
-                //final Point gpsLocation = new Point(location.getX(), location.getY(), SpatialReferences.getWgs84());
-                //locationUpdated(gpsLocation);
+                    final Point gpsLocation = new Point(location.getX(), location.getY(), SpatialReferences.getWgs84());
+                    locationUpdated(gpsLocation);
+                }
+                catch(Exception e)
+                {  }
             }
         });
+
+        mLocationDisplay.startAsync();
     }
 
     private Point processBuffer(PointCollection pointsBuffer) {
@@ -199,7 +214,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void GPSPulseEvent(Point point) {
-        Toast.makeText(MainActivity.this, "x:" + point.getX() + " y:" + point.getY(), Toast.LENGTH_SHORT).show();
+        //Toast.makeText(MainActivity.this, "x:" + point.getX() + " y:" + point.getY(), Toast.LENGTH_SHORT).show();
+
+        mRester.updateUserPostion(13, point.getX(), point.getY());
+
+        //myAsyncTask = new MyAsyncTask();
+        //myAsyncTask.execute(point);
     }
 
     @Override

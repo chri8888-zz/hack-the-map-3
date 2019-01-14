@@ -106,8 +106,8 @@ public class RestRequest {
         String tokenUrl = "/portal/sharing/rest/generateToken/";
 
         Map<String, Object> params = new LinkedHashMap<>();
-        params.put("username", "shawker");
-        params.put("password", "Festiflo1");
+        params.put("username", "USERNAME");
+        params.put("password", "PASSWORD");
         params.put("client", "referer");
         params.put("referer", "https://cardiffportal.esri.com:6443/arcgis/admin");
         params.put("f", "json");
