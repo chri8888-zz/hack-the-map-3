@@ -44,11 +44,11 @@ namespace festiflo_logistics_controller
       LoadHeatMap();
       updateStaffUserCounts();
 
-//      Thread mapRefresher = new Thread(new ThreadStart(MapRefreshTimer));
-//      mapRefresher.Start();
+      Thread mapRefresher = new Thread(new ThreadStart(MapRefreshTimer));
+      mapRefresher.Start();
     }
 
-    private bool _autoRefresh = true;
+    private bool _autoRefresh = false;
 
     public bool AutoRefresh
     {
@@ -72,9 +72,9 @@ namespace festiflo_logistics_controller
     {
       while (true)
       {
-        while (AutoRefresh)
+        if (AutoRefresh)
           reloadHeatMap();
-        Thread.Sleep(1000 * 15); // 5 Minutes
+        Thread.Sleep(1000 * 5); // 5 Minutes
                                  //Have a break condition
       }
     }
