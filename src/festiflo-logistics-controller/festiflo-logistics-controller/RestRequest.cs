@@ -178,7 +178,7 @@ namespace festiflo_logistics_controller
             { "id", ID },
             { "name", Name },
             { "description", Description },
-            { "eventtype", EventType.ToString() },
+            { "eventtype", (int) EventType },
           }
         },
         {
