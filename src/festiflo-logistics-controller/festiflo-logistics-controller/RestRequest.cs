@@ -13,7 +13,7 @@ namespace festiflo_logistics_controller
 {
   internal class StaffMember
   {
-    public int OID { get; set; }
+    public int OID { get; private set; }
     public int ID { get; set; }
     public string Name { get; set; }
     public double X { get; set; }
@@ -100,7 +100,7 @@ namespace festiflo_logistics_controller
 
   internal class EventData
   {
-    public int OID { get; set; }
+    public int OID { get; private set; }
     public int ID { get; set; }
     public string Name { get; set; }
     public string Description { get; set; }
@@ -315,8 +315,14 @@ namespace festiflo_logistics_controller
       await httpClient.PostAsync(_cardiffServer + _eventLayer + "addFeatures", content);
     }
 
-    public async Task DeleteEvent(int objectID)
+    public async Task DeleteEvent(int eventID)
     {
+      var events = await QueryEvents("id = " + eventID);
+      if (events == null || events.Count < 1)
+        return;
+
+      int objectID = events.FirstOrDefault().OID;
+
       var token = await GetToken();
       if (string.IsNullOrEmpty(token))
         return;
@@ -325,24 +331,27 @@ namespace festiflo_logistics_controller
       {
         { "token", token },
         { "f", "pjson" },
-        { "oids", objectID.ToString() }
+        { "where", "oid = " + objectID.ToString() }
       };
 
       var content = new FormUrlEncodedContent(postParams);
       await httpClient.PostAsync(_cardiffServer + _eventLayer + "deleteFeatures", content);
     }
 
-    public async Task<List<EventData>> QueryEvents()
+    public async Task<List<EventData>> QueryEvents(string whereClause = "")
     {
       var token = await GetToken();
       if (string.IsNullOrEmpty(token))
         return null;
 
+      if (string.IsNullOrEmpty(whereClause))
+        whereClause = "oid > 0";
+
       var postParams = new Dictionary<string, string>()
       {
         { "token", token },
         { "f", "pjson" },
-        { "where", "oid > 0" },
+        { "where", whereClause },
         { "outfields", "*" }
       };
 
