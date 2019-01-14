@@ -13,13 +13,57 @@ using System.Windows.Media;
 
 namespace festiflo_logistics_controller
 {
-  class DataUtils
+  public class DataUtils
   {
-    private static readonly IList<(double ratio, Color color)> defaultColorStops = new ReadOnlyCollection<(double, Color)>
-      (new List<(double, Color)> {
-        { (0.0, Colors.Transparent) },
-        { (0.10, Colors.Red) },
-        { (1.0, Colors.Yellow) }});
+    #region ColorStops
+    public enum ColorPalletteType
+    {
+      Heat = 0,
+      Blues = 1
+    }
+
+    public static IList<(double ratio, Color color)> GetColorStops(ColorPalletteType pallette = ColorPalletteType.Heat)
+    {
+      var colorStops = new List<(double, Color)>(){
+        (0.0, Colors.Transparent)
+      };
+
+      List<Color> colorList = (pallette == ColorPalletteType.Heat) ? _pallette_Heat : _pallette_Blues;
+      for (int i = 0; i < colorList.Count ; ++i)
+        colorStops.Add((_stopValues[i], colorList[i]));
+
+      return colorStops;
+    }
+
+    private static readonly List<double> _stopValues = new List<double>()
+    {
+      0.05, 0.3, 0.4, 0.5, 0.7, 0.85, 1.0
+    };
+
+    private static readonly List<Color> _pallette_Heat = new List<Color>()
+    {
+      //Red/Orange/Yellow
+      Color.FromRgb(122, 0, 45),
+      Color.FromRgb(169, 62, 60),
+      Color.FromRgb(207, 112, 71),
+      Color.FromRgb(232, 155, 83),
+      Color.FromRgb(243, 191, 94),
+      Color.FromRgb(237, 217, 110), 
+      Color.FromRgb(219, 226, 175),
+    };
+
+    private static readonly List<Color> _pallette_Blues = new List<Color>()
+    {
+      //DarkBlue/LightBlue
+      Color.FromRgb(11, 50, 129),
+      Color.FromRgb(28, 91, 166),
+      Color.FromRgb(53, 126, 185),
+      Color.FromRgb(90, 158, 204),
+      Color.FromRgb(142, 190, 218),
+      Color.FromRgb(186, 210, 235),
+      Color.FromRgb(235, 240, 255),
+    };
+    #endregion
 
     public static async Task AddOperationalLayerAsync(Map map, string url, Renderer renderer = null)
     {
@@ -78,16 +122,16 @@ namespace festiflo_logistics_controller
       // Create a new HeatMapRenderer with info provided by the user.
       HeatMapRenderer heatMapRendererInfo = new HeatMapRenderer
       {
-        BlurRadius = 14,
-        MinPixelIntensity = 0,
-        MaxPixelIntensity = 100,
+        BlurRadius = blurRadius,
+        MinPixelIntensity = minPixelIntensity,
+        MaxPixelIntensity = maxPixelIntensity,
       };
 
       // Add the chosen color stops (plus transparent for empty areas).
-      colorStops = colorStops ?? defaultColorStops;
-      foreach (var ColorStop in colorStops)
+      colorStops = colorStops ?? GetColorStops(); //defaultColorStops;
+      foreach (var (ratio, color) in colorStops)
       {
-        heatMapRendererInfo.AddColorStop(ColorStop.ratio, ColorStop.color);
+        heatMapRendererInfo.AddColorStop(ratio, color);
       }
 
 
