@@ -338,8 +338,6 @@ namespace festiflo_logistics_controller
       }
     }
 
-
-
     public enum LocationType
     {
       Stage,
@@ -357,10 +355,9 @@ namespace festiflo_logistics_controller
       /// <param name="propertyName">The name of the property that has changed</param>
       protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
       {
-        var propertyChangedHandler = PropertyChanged;
-        if (propertyChangedHandler != null)
-          propertyChangedHandler(this, new PropertyChangedEventArgs(propertyName));
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
       }
+
       public event PropertyChangedEventHandler PropertyChanged;
 
       public bool Understaffed { get => StaffNeeded > 0; }
@@ -460,7 +457,10 @@ namespace festiflo_logistics_controller
     }
 
     #region Event Props
-    private List<EventViewModel> _activeEvents = new List<EventViewModel>();
+
+    private int _nextID = 0;
+
+    public List<EventData> ActiveEvents = new List<EventData>();
 
     private string _eventTitle = "";
     public string EventTitle
@@ -535,34 +535,26 @@ namespace festiflo_logistics_controller
         return _sendEventCommand;
       }
     }
-    #endregion
 
-    private void SendEvent()
+    #endregion
+    private async void SendEvent()
     {
-      // do stuff with 
-      var newEvent = new EventViewModel(_eventTitle, _eventDesc, _eventLocation, _eventType);
+      var newEvent = new EventData() { ID = _nextID++, Name = _eventTitle, Description = _eventDesc, X = _eventLocation.X, Y = _eventLocation.Y, EventType = _eventType };
+
+      var rreq = new RestRequest();
+      await rreq.CreateEvent(newEvent);
+
+      ActiveEvents = await rreq.QueryEvents();
 
       EventTitle = "";
       EventDescription = "";
       EventLocation = null;
     }
-  }
 
-  public class EventViewModel
-  {
-    public string Title { get; set; }
-    public string Description { get; set; }
-    public MapPoint Location { get; set; }
-    public EventsManagerViewModel.EventType Type { get; set; }
-    //timer
-    //type
-
-    public EventViewModel(string title, string desc, MapPoint location, EventsManagerViewModel.EventType type = EventsManagerViewModel.EventType.Information)
+    public async Task PollEvents()
     {
-      Title = title;
-      Description = desc;
-      Location = location;
-      Type = type;
+      var rreq = new RestRequest();
+      ActiveEvents = await rreq.QueryEvents();
     }
   }
 }
