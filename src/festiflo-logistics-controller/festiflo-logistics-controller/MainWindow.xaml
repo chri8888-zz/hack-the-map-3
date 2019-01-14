@@ -7,7 +7,7 @@
         xmlns:local="clr-namespace:festiflo_logistics_controller"
         mc:Ignorable="d"
         Title="FestiFlo MS" Height="650" Width="900" 
-        Background="#4551c7" Foreground="#4551c7" BorderBrush="#ffe552ff"
+        Background="#4551c7" Foreground="#4551c7" BorderBrush="#ffe552ff" WindowState="Maximized"
         PreviewMouseMove="Window_PreviewMouseMove">
   <Window.Resources>
     <local:MapViewModel x:Key="MapViewModel" />
@@ -94,14 +94,14 @@
         <ListBox Grid.Row="5" ItemsSource="{Binding StafflocationsViewModel.StaffMoveHistory, Source={StaticResource MapViewModel}}" Height="150"/>
         <!--<TextBlock Grid.Row="2" Text="{Binding GeometryString, Source={StaticResource MapViewModel}}" TextWrapping="Wrap"/>-->
       
-        </Grid>
+      </Grid>
       <GridSplitter Grid.Column="1"
               HorizontalAlignment="Center"
               VerticalAlignment="Stretch"
               Background="Gray" 
               ShowsPreview="True"
               Width="5" />
-      <esri:MapView x:Name="EsriMapView"
+      <esri:MapView x:Name="EsriMapView" 
                     MouseLeftButtonDown="MapView_LeftMouseDown"
                     Grid.Column="2" Map="{Binding Map, Source={StaticResource MapViewModel}}" />
 
