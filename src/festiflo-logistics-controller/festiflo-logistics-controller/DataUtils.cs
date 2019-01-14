@@ -71,6 +71,16 @@ namespace festiflo_logistics_controller
       map.OperationalLayers.Add(operationaLayer);
     }
 
+    public static async void AddOrReplaceOperationalLayerAsync(Map map, string url, Renderer renderer = null)
+    {
+      var operationaLayer = await GetLayer(url, renderer);
+      var layer = map.OperationalLayers.FirstOrDefault((x) => x.Name == operationaLayer.Name);
+      if (layer != null)
+        map.OperationalLayers.Remove(layer);
+      map.OperationalLayers.Add(operationaLayer);
+    }
+
+
     public static async Task<FeatureLayer> GetLayer(string url, Renderer renderer = null)
     {
       FeatureLayer _operationalLayer = null;
@@ -90,6 +100,22 @@ namespace festiflo_logistics_controller
 
       return _operationalLayer;
     }
+
+    public static async Task<ArcGISVectorTiledLayer> GetVectorTileLayer(string url)
+    {
+      ArcGISVectorTiledLayer _vectorTiledLayer = null;
+      try
+      {
+        _vectorTiledLayer = new ArcGISVectorTiledLayer(new Uri(url));
+        await _vectorTiledLayer.LoadAsync();
+      }
+      catch (Exception)
+      {
+      }
+
+      return _vectorTiledLayer;
+    }
+
 
     public static Renderer GetHeatmapRenderer(long blurRadius = 14, long minPixelIntensity = 0, long maxPixelIntensity = 100, IList<(double ratio, Color color)> colorStops = null)
     {
@@ -171,10 +197,34 @@ namespace festiflo_logistics_controller
       return resultingFeature.GetAttributeValue(fieldName);
     }
 
+    public static async Task<List<object>> GetAttributes(string url, string whereClause = "", string[] fieldNames = null)
+    {
+      if (fieldNames == null)
+        return null;
+
+      var attributes = new List<object>();
+      var table = new ServiceFeatureTable(new Uri(url));
+      await table.LoadAsync();
+      if (table.GeometryType != Esri.ArcGISRuntime.Geometry.GeometryType.Polygon)
+        return null;
+
+      var queryParams = new QueryParameters();
+      queryParams.WhereClause = whereClause;
+      var count = await table.QueryFeatureCountAsync(queryParams);
+      var queryFeatureResults = await table.QueryFeaturesAsync(queryParams);
+      var resultingFeature = queryFeatureResults.FirstOrDefault();
+
+      foreach (var fieldName in fieldNames)
+        attributes.Add(resultingFeature.GetAttributeValue(fieldName));
+
+      return attributes;
+    }
+
+
     public static int GetContainedCount(List<Esri.ArcGISRuntime.Geometry.Geometry> countableGeometries, Esri.ArcGISRuntime.Geometry.Geometry containingPolygon, int bufferInMeters = 0)
     {
       var count = 0;
-      if (countableGeometries == null || containingPolygon.GeometryType != Esri.ArcGISRuntime.Geometry.GeometryType.Polygon)
+      if (countableGeometries == null)
         return count;
 
       var polyCorrected = GeometryEngine.RemoveZAndM(containingPolygon);

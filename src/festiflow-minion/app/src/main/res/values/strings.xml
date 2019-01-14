@@ -1,4 +1,10 @@
 <resources>
-    <string name="app_name">Festiflow-minion</string>
+    <string name="app_name">Festiflo-minion</string>
     <string name="action_settings">Settings</string>
+
+    <string name="url_toilets">http://cardiffportal.esri.com/server/rest/services/Hosted/ToiletsWGS/FeatureServer/0</string>
+    <string name="url_stages">http://cardiffportal.esri.com/server/rest/services/Hosted/Stages_WebMercator/FeatureServer/3</string>
+    <string name="url_carparks">http://cardiffportal.esri.com/server/rest/services/Hosted/CarParks/FeatureServer/5</string>
+    <string name="url_entrances">http://cardiffportal.esri.com/server/rest/services/Hosted/EntrancesStar/FeatureServer/1</string>
+    <string name="url_campsites">http://cardiffportal.esri.com/server/rest/services/Hosted/Campsites/FeatureServer/3</string>
 </resources>
