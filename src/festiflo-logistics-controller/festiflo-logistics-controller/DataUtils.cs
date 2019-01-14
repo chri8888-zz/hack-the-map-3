@@ -79,7 +79,7 @@ namespace festiflo_logistics_controller
       {
         var index = map.OperationalLayers.IndexOf(layer);
         map.OperationalLayers.Insert(index, operationaLayer);
-        map.OperationalLayers.Remove(layer);
+        Task.Delay(1500).ContinueWith(t => map.OperationalLayers.Remove(layer));
       }
       else
         map.OperationalLayers.Add(operationaLayer);

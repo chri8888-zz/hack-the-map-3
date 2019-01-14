@@ -55,29 +55,6 @@ namespace festiflo_logistics_controller
       set { _map = value; OnPropertyChanged(); }
     }
 
-    private Esri.ArcGISRuntime.Geometry.Geometry _geometry;
-
-    public Esri.ArcGISRuntime.Geometry.Geometry JohnPeelGeometry
-    {
-      get { return _geometry; }
-      set
-      {
-        _geometry = value;
-        OnPropertyChanged(nameof(GeometryString));
-      }
-    }
-
-    public string GeometryString
-    {
-      get
-      {
-        var firstStaff = _stafflocationsViewModel.Locations.FirstOrDefault();
-        if (firstStaff != null)
-          return "Current staffing: " + firstStaff.CurrentStaffing + ", User count: " + firstStaff.UserCount + ", Staff needed: " + firstStaff.StaffNeeded;
-        return "";
-      }
-    }
-
     private string geomCount;
 
     public string GeomCount
@@ -126,21 +103,14 @@ namespace festiflo_logistics_controller
 
       var vectorLayer = await DataUtils.GetVectorTileLayer("https://tiles.arcgis.com/tiles/cjTkfDK7oY4dk5Cd/arcgis/rest/services/Glasto/VectorTileServer");
       _map.OperationalLayers.Add(vectorLayer);
-
-      JohnPeelGeometry = await DataUtils.GetGeometry(_stagesURL);
-
-      var users = await DataUtils.GetGeometries(_userDataUrl, "oid >= 0");
-      var stages = await DataUtils.GetGeometries(_stagesURL, "objectid >= 0");
-      _stafflocationsViewModel.UpdateUserCounts(users);
-
-      GeomCount = "At first poly: " + DataUtils.GetContainedCount(users, JohnPeelGeometry, 200).ToString();
-
+      updateStaffUserCounts();
     }
 
     public void loadfullMap()
     {
       _map.OperationalLayers = new LayerCollection();
       ReloadLayers();
+      updateStaffUserCounts();
     }
 
     public void reloadHeatMap()
@@ -243,11 +213,8 @@ namespace festiflo_logistics_controller
 
     private async void InitializeAsync()
     {
-      var JohnPeelGeometry = await DataUtils.GetGeometry(_stagesURL);
-
       ExtractInformation(_stagesURL, "objectid >= 0", LocationType.Stage);
       ExtractInformation(_entrancesURL, "objectid >= 0", LocationType.Entrance);
-      var entrances = await DataUtils.GetGeometries(_entrancesURL, "objectid >= 0");
     }
 
     private async void ExtractInformation(string url, string whereClause, LocationType locationType)
@@ -292,11 +259,11 @@ namespace festiflo_logistics_controller
         var movingStaff = ((freeStaff > loc.StaffNeeded) ? loc.StaffNeeded : freeStaff);
         if (movingStaff > 0)
         {
-          StaffMoveHistory.Insert(0, loc.Name + ": " + movingStaff + " staff added.");
+          StaffMoveHistory.Insert(0, DateTime.Now + " - " + loc.Name + ": " + movingStaff + " staff added.");
           loc.CurrentStaffing += movingStaff;
         }
-        if (freeStaff == 0 && StaffMoveHistory.Count != 0 && !StaffMoveHistory[0].Equals("No more free staff"))
-          StaffMoveHistory.Insert(0, "No more free staff");
+        if (freeStaff == 0 && StaffMoveHistory.Count != 0 && !StaffMoveHistory[0].Contains("No more free staff"))
+          StaffMoveHistory.Insert(0, DateTime.Now + " - No more free staff");
       }
     }
 
@@ -304,7 +271,7 @@ namespace festiflo_logistics_controller
     {
       foreach (var loc in Locations.Where(location => location.StaffNeeded < 0).ToList())
       {
-        StaffMoveHistory.Insert(0, loc.Name + ": " + Math.Abs(loc.StaffNeeded) + " staff removed.");
+        StaffMoveHistory.Insert(0, DateTime.Now + " - " + loc.Name + ": " + Math.Abs(loc.StaffNeeded) + " staff removed.");
         loc.CurrentStaffing += loc.StaffNeeded;
       }
     }
