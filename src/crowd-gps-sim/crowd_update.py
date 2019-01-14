@@ -212,12 +212,7 @@ if __name__ == "__main__":
   passwd = lines[1].strip()
 
   token = get_token(user, passwd, server)
-  # current_users = query_users()
-  # print("Queried users")
-
-  # current_user_count = len(current_users)
-  # if current_user_count != USER_COUNT:
-  
+ 
   print('Reseting users')
   delete_users()
   create_users()
@@ -228,20 +223,6 @@ if __name__ == "__main__":
     exit()
   else:
     print('Updated users')
-
-  # if current_user_count == 0:
-  #   print('creating users please restart')
-  #   features = []
-  #   for i in range(0, USER_COUNT):
-  #     user = User(i)
-  #     features.append(user.to_json())
-
-  #   send_users(features, 'addFeatures')
-  #   exit()
-  # elif current_user_count != USER_COUNT:
-  #   print("Invalid number of users. Deleting. Please restart")
-  #   print(current_user_count)
-  #   exit() 
 
   user_positions = read_csv(CSV_FILE)
   print("loaded simulation file")
@@ -274,9 +255,8 @@ if __name__ == "__main__":
     current_user = current_users[id]
     current_user.x = user_position.x
     current_user.y = user_position.y
-    # current_user.date_time = user_position.date_time
     current_user.velocity = user_position.velocity
     current_user.distance = user_position.distance
     
     edit_users([current_user.to_json()])
-    #print("Updating user")
+    print("Updated user: " + str(id))

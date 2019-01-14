@@ -33,6 +33,10 @@ namespace festiflo_logistics_controller
 
     private Window _dragAdorner = null;
     private bool _eventPlacementMode = false;
+    private Graphic _previewTextGraphic = null;
+    private Graphic _previewMarkerGraphic = null;
+
+    private List<Tuple<Graphic, Graphic>> _activeGraphics = new List<Tuple<Graphic, Graphic>>();
 
     private SimpleMarkerSymbol _infoSymbol =
       new SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Circle, System.Drawing.Color.LightBlue, 12);
@@ -72,44 +76,37 @@ namespace festiflo_logistics_controller
 
         if (_eventPlacementMode)
         {
+          if (_previewMarkerGraphic != null && _previewTextGraphic != null)
+          {
+            _previewMarkerGraphic.Geometry = mapRelativeLoc;
+            _previewTextGraphic.Geometry = mapRelativeLoc;
+            _eventPlacementMode = false;
+
+            // remove the visual feedback
+            if (_dragAdorner != null)
+            {
+              _dragAdorner.Close();
+              _dragAdorner = null;
+            }
+
+            return;
+          }
+
           _mapVM.EventManagerViewModel.EventLocation = mapRelativeLoc;
           var type = _mapVM.EventManagerViewModel.SelectedEventType;
 
-          var textColor = System.Drawing.Color.Red;
-          SimpleMarkerSymbol markerSym = null;
-          if (type == EventsManagerViewModel.EventType.Information)
-          {
-            markerSym = _infoSymbol;
-            textColor = System.Drawing.Color.DarkBlue;
-          }
-          else if (type == EventsManagerViewModel.EventType.Warning)
-          {
-            markerSym = _warningSymbol;
-            textColor = System.Drawing.Color.Orange;
-          }
-          else if (type == EventsManagerViewModel.EventType.Closure)
-          {
-            markerSym = _closureSymbol;
-            textColor = System.Drawing.Color.Red;
-          }
-
-          var textSym = new TextSymbol()
-          {
-            Text = _mapVM.EventManagerViewModel.EventTitle,
-            Color = textColor,
-            HaloColor = System.Drawing.Color.White,
-            HaloWidth = 2,
-            Size = 14,
-            HorizontalAlignment = Esri.ArcGISRuntime.Symbology.HorizontalAlignment.Left,
-            VerticalAlignment = Esri.ArcGISRuntime.Symbology.VerticalAlignment.Bottom
-          };
-
-          var markerGraphic = new Graphic(mapRelativeLoc, markerSym);
-          var textGraphic = new Graphic(mapRelativeLoc, textSym);
           if (_clickEventOverlay != null)
           {
+            var graphics = CreateEventGraphics(type, mapRelativeLoc, _mapVM.EventManagerViewModel.EventTitle);
+            var markerGraphic = graphics.Item1;
+            var textGraphic = graphics.Item2;
+
             _clickEventOverlay.Graphics.Add(markerGraphic);
             _clickEventOverlay.Graphics.Add(textGraphic);
+
+            _previewMarkerGraphic = markerGraphic;
+            _previewTextGraphic = textGraphic;
+
           }
 
           // remove the visual feedback
@@ -124,6 +121,42 @@ namespace festiflo_logistics_controller
       }
     }
 
+    private Tuple<Graphic, Graphic> CreateEventGraphics(EventsManagerViewModel.EventType type, MapPoint location, string title)
+    {
+      var textColor = System.Drawing.Color.Red;
+      SimpleMarkerSymbol markerSym = null;
+      if (type == EventsManagerViewModel.EventType.Information)
+      {
+        markerSym = _infoSymbol;
+        textColor = System.Drawing.Color.DarkBlue;
+      }
+      else if (type == EventsManagerViewModel.EventType.Warning)
+      {
+        markerSym = _warningSymbol;
+        textColor = System.Drawing.Color.DarkOrange;
+      }
+      else if (type == EventsManagerViewModel.EventType.Closure)
+      {
+        markerSym = _closureSymbol;
+        textColor = System.Drawing.Color.Red;
+      }
+
+      var textSym = new TextSymbol()
+      {
+        Text = title,
+        Color = textColor,
+        HaloColor = System.Drawing.Color.White,
+        HaloWidth = 2,
+        Size = 14,
+        HorizontalAlignment = Esri.ArcGISRuntime.Symbology.HorizontalAlignment.Left,
+        VerticalAlignment = Esri.ArcGISRuntime.Symbology.VerticalAlignment.Bottom
+      };
+
+      var markerGraphic = new Graphic(location, markerSym);
+      var textGraphic = new Graphic(location, textSym);
+
+      return new Tuple<Graphic, Graphic>(markerGraphic, textGraphic);
+    }
     private void Window_PreviewMouseMove(object sender, MouseEventArgs e)
     {
       if (_eventPlacementMode)
@@ -240,8 +273,48 @@ namespace festiflo_logistics_controller
           mapVM.HeatMapColorPallette = DataUtils.ColorPalletteType.Heat;
         else if (color == "Blues")
           mapVM.HeatMapColorPallette = DataUtils.ColorPalletteType.Blues;
+        else if (color == "Vivid")
+          mapVM.HeatMapColorPallette = DataUtils.ColorPalletteType.Vivid;
       }
     }
+
+
+    private void SendEventButton_Click(object sender, RoutedEventArgs e)
+    {
+      _previewMarkerGraphic = null;
+      _previewTextGraphic = null;
+    }
+
+    private async Task LoadEvents()
+    {
+      if (_border.DataContext is MapViewModel mapVM)
+      {
+        await mapVM.EventManagerViewModel.PollEvents();
+
+        foreach (var graphicSet in _activeGraphics)
+        {
+          _clickEventOverlay.Graphics.Remove(graphicSet.Item1);
+          _clickEventOverlay.Graphics.Remove(graphicSet.Item2);
+        }
+        _activeGraphics.Clear();
+
+        var eventList = mapVM.EventManagerViewModel.ActiveEvents;
+        foreach (var e in eventList)
+        {
+          var graphics = CreateEventGraphics(e.EventType, new MapPoint(e.X, e.Y), e.Name);
+          _activeGraphics.Add(graphics);
+
+          _clickEventOverlay.Graphics.Add(graphics.Item1);
+          _clickEventOverlay.Graphics.Add(graphics.Item2);
+        }
+      }
+    }
+
+    private async void LoadData_Click(object sender, RoutedEventArgs e)
+    {
+      await LoadEvents();
+    }
+
 
     private List<Graphic> StaffGraphics = new List<Graphic>();
     private void StaffCheckBox_Click(object sender, RoutedEventArgs e)
@@ -305,6 +378,7 @@ namespace festiflo_logistics_controller
 
       StaffGraphics = new List<Graphic>();
     }
+
 
 
     // Map initialization logic is contained in MapViewModel.cs

@@ -11,15 +11,6 @@ using Newtonsoft.Json;
 
 namespace festiflo_logistics_controller
 {
-
-  // ToDo: Delete when merged
-  public enum EventType
-  {
-    Information = 0,
-    Warning = 1,
-    Closure = 2
-  }
-
   internal class StaffMember
   {
     public int OID { get; private set; }
@@ -105,7 +96,7 @@ namespace festiflo_logistics_controller
     }
   }
 
-  internal class EventData
+  public class EventData
   {
     public int OID { get; private set; }
     public int ID { get; set; }
@@ -113,7 +104,7 @@ namespace festiflo_logistics_controller
     public string Description { get; set; }
     public double X { get; set; }
     public double Y { get; set; }
-    public EventType EventType {get; set; }
+    public EventsManagerViewModel.EventType EventType {get; set; }
     public static EventData fromJSON(JObject json)
     {
       if (json == null)
@@ -138,10 +129,10 @@ namespace festiflo_logistics_controller
       if (eventTypeInt == null)
         return null;
 
-      if (eventTypeInt < 0 || eventTypeInt > Enum.GetValues(typeof(EventType)).Cast<int>().Max())
+      if (eventTypeInt < 0 || eventTypeInt > Enum.GetValues(typeof(EventsManagerViewModel.EventType)).Cast<int>().Max())
         return null;
 
-      var eventType = (EventType)eventTypeInt.Value;
+      var eventType = (EventsManagerViewModel.EventType)eventTypeInt.Value;
 
       var geometry = json.GetValue("geometry") as JObject;
       if (geometry == null)

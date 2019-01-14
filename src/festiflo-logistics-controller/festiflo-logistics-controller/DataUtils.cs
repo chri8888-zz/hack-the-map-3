@@ -19,7 +19,8 @@ namespace festiflo_logistics_controller
     public enum ColorPalletteType
     {
       Heat = 0,
-      Blues = 1
+      Blues = 1,
+      Vivid  = 2
     }
 
     public static IList<(double ratio, Color color)> GetColorStops(ColorPalletteType pallette = ColorPalletteType.Heat)
@@ -28,7 +29,15 @@ namespace festiflo_logistics_controller
         (0.0, Colors.Transparent)
       };
 
-      List<Color> colorList = (pallette == ColorPalletteType.Heat) ? _pallette_Heat : _pallette_Blues;
+      List<Color> colorList = null;
+
+      if (pallette == ColorPalletteType.Heat)
+        colorList = _pallette_Heat;
+      if (pallette == ColorPalletteType.Blues)
+        colorList = _pallette_Blues;
+      if (pallette == ColorPalletteType.Vivid)
+        colorList = _pallette_Vivid;
+
       for (int i = 0; i < colorList.Count ; ++i)
         colorStops.Add((_stopValues[i], colorList[i]));
 
@@ -52,6 +61,18 @@ namespace festiflo_logistics_controller
       Color.FromRgb(219, 226, 175),
     };
 
+    private static readonly List<Color> _pallette_Vivid = new List<Color>()
+    {
+      //Red/Orange/Yellow
+      Color.FromRgb(255, 0, 0),
+      Color.FromRgb(255, 85, 0),
+      Color.FromRgb(255, 170, 0),
+      Color.FromRgb(255, 255, 0),
+      Color.FromRgb(170, 255, 0),
+      Color.FromRgb(85, 255, 0),
+      Color.FromRgb(219, 255, 0),
+    };
+
     private static readonly List<Color> _pallette_Blues = new List<Color>()
     {
       //DarkBlue/LightBlue
@@ -73,6 +94,7 @@ namespace festiflo_logistics_controller
 
     public static async void AddOrReplaceOperationalLayerAsync(Map map, string url, Renderer renderer = null)
     {
+      var heatMapRenderer = renderer.ToJson();
       var operationaLayer = await GetLayer(url, renderer);
       var layer = map.OperationalLayers.FirstOrDefault((x) => x.Name == operationaLayer.Name);
       if (layer != null)
@@ -123,7 +145,7 @@ namespace festiflo_logistics_controller
     }
 
 
-    public static Renderer GetHeatmapRenderer(long blurRadius = 14, long minPixelIntensity = 0, long maxPixelIntensity = 100, DataUtils.ColorPalletteType type = DataUtils.ColorPalletteType.Heat)
+    public static Renderer GetHeatmapRenderer(byte opacity = 255, long blurRadius = 14, long minPixelIntensity = 0, long maxPixelIntensity = 100, DataUtils.ColorPalletteType type = DataUtils.ColorPalletteType.Heat)
     {
       // Create a new HeatMapRenderer with info provided by the user.
       HeatMapRenderer heatMapRendererInfo = new HeatMapRenderer
@@ -136,7 +158,12 @@ namespace festiflo_logistics_controller
       // Add the chosen color stops (plus transparent for empty areas).
       var colorStops = GetColorStops(type); //defaultColorStops;
       foreach (var (ratio, color) in colorStops)
-        heatMapRendererInfo.AddColorStop(ratio, color);
+      {
+        var colorWithAlpha = color;
+        if (ratio != 0)
+          colorWithAlpha.A = opacity;
+        heatMapRendererInfo.AddColorStop(ratio, colorWithAlpha);
+      }
 
       // Get the JSON representation of the renderer class.
       string heatMapJson = heatMapRendererInfo.ToJson();
@@ -154,6 +181,7 @@ namespace festiflo_logistics_controller
 
       var queryParams = new QueryParameters();
       queryParams.WhereClause = "objectid > 0";
+
       var count = await table.QueryFeatureCountAsync(queryParams);
       var queryFeatureResults = await table.QueryFeaturesAsync(queryParams);
       var resultingFeature = queryFeatureResults.FirstOrDefault();

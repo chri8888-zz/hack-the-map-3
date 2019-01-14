@@ -83,8 +83,10 @@
                 <Button x:Name="LocationButton" Width="120" Height="25"
                       Content="Set Location"  Margin="6,0,0,0" 
                       Click="LocationButton_Click"/>
-                <Button x:Name="SendEventButton" Width="120" Height="25"
-                      Content="Send Event" IsEnabled="{Binding EventManagerViewModel.CanSendEvent, Source={StaticResource MapViewModel}}"
+              <Button x:Name="SendEventButton" Width="120" Height="25"
+                      Content="Send Event" 
+                      Click ="SendEventButton_Click" 
+                      IsEnabled="{Binding EventManagerViewModel.CanSendEvent, Source={StaticResource MapViewModel}}"
                       Command="{Binding EventManagerViewModel.SendEventCmd, Source={StaticResource MapViewModel}}"/>
               </StackPanel>
             </StackPanel>
@@ -102,17 +104,21 @@
                 SelectionChanged="ComboBox_SelectionChanged">
                 <ComboBoxItem IsSelected="True" Name="Heat">Heat</ComboBoxItem>
                 <ComboBoxItem Name="Blues">Blues</ComboBoxItem>
+                <ComboBoxItem Name="Vivid">Vivid</ComboBoxItem>
               </ComboBox>
-              <CheckBox Margin="10" 
-                  IsChecked="{Binding AutoRefresh, Source={StaticResource MapViewModel}, Mode=TwoWay}" >
-                Auto refresh
-              </CheckBox>
+              <TextBlock Text="Opacity" VerticalAlignment="Center" Foreground ="Black" Margin="0,0,0,5"/>
+              <Slider x:Name="AlphaSlider" VerticalAlignment="Center" Width="100" Minimum="0" Maximum="255" Value="{Binding HeatMapOpacity, Source={StaticResource MapViewModel}}"/>
             </StackPanel>
+            <CheckBox Margin="10" 
+                  IsChecked="{Binding AutoRefresh, Source={StaticResource MapViewModel}, Mode=TwoWay}" >
+              Auto refresh
+            </CheckBox>
           </StackPanel>
 
           <Button Grid.Row="4" Margin="0,40,0,0"
               Content="Load data"
               Width="120" Height="25"
+              Click="LoadData_Click"
               Command="{Binding LoadFullMapCommand, Source={StaticResource MapViewModel}}"/>
           <Button Grid.Row="4" Margin="10"
                   Content="Move staff"
