@@ -13,51 +13,73 @@
     <local:MapViewModel x:Key="MapViewModel" />
   </Window.Resources>
   <Grid>
-    <Grid.RowDefinitions>
-      <RowDefinition Height="Auto"/>
-      <RowDefinition/>
-      <RowDefinition Height="Auto"/>
-      <RowDefinition/>
-    </Grid.RowDefinitions>
-    <Grid Grid.Row="1">
-      <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="400"/>
-        <ColumnDefinition Width="Auto" />
-        <ColumnDefinition/>
-      </Grid.ColumnDefinitions>
-      <Grid Grid.Column="0">
-        <Grid.RowDefinitions>
-          <RowDefinition Height="Auto"/>
-          <RowDefinition Height="Auto"/>
-          <RowDefinition Height="Auto"/>
-          <RowDefinition Height="Auto"/>
-          <RowDefinition Height="Auto"/>
-          <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-        <Image x:Name="LogoImage" Grid.Row="0" Margin="0, 10,0,0"/>
-        <!-- -->
+    <DockPanel LastChildFill="True">
+      <Border DockPanel.Dock="Bottom" BorderBrush="#FF000000" BorderThickness="3" CornerRadius="8,8,8,8" Height="200">
+        <DataGrid ItemsSource="{Binding StafflocationsViewModel.Locations, Source={StaticResource MapViewModel}, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" 
+                AutoGenerateColumns="False">
+          <DataGrid.Columns>
+            <DataGridTextColumn Header="Location" Binding="{Binding Name}"/>
+            <DataGridTextColumn Header="Additional staff needed" Binding="{Binding StaffNeeded}"/>
+            <DataGridTextColumn Header="Current Staffing" Binding="{Binding CurrentStaffing}"/>
+            <DataGridTextColumn Header="Users" Binding="{Binding UserCount}"/>
+          </DataGrid.Columns>
 
-        <Border  x:Name="_border" Visibility="Collapsed"
+          <DataGrid.RowStyle>
+            <Style TargetType="DataGridRow">
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding Understaffed, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" Value="true">
+                  <Setter Property="Background" Value="#ffe552"></Setter>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Understaffed, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" Value="false">
+                  <Setter Property="Background" Value="#2ed3cc"></Setter>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding UrgentStaffRequired, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" Value="0">
+                  <Setter Property="Background" Value="#fd78ad"></Setter>
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </DataGrid.RowStyle>
+        </DataGrid>
+      </Border>
+      <Grid DockPanel.Dock="Bottom">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="400"/>
+          <ColumnDefinition Width="Auto" />
+          <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Grid Grid.Column="0">
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+          </Grid.RowDefinitions>
+          <Image x:Name="LogoImage" Grid.Row="0" Margin="0, 10,0,0"/>
+          <!-- -->
+
+          <Border  x:Name="_border" Visibility="Collapsed"
                  DataContext="{StaticResource MapViewModel}"/>
-        <Border HorizontalAlignment="Left" Grid.Row="1" Margin="6, 40, 6, 3" Width="Auto" Height="Auto">
-          <StackPanel Orientation="Vertical" Height="Auto">
-            <TextBlock Text="Event Type" FontSize="14"  Width="Auto" Foreground="Black" HorizontalAlignment="Left"/>
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-              <RadioButton x:Name="RadioButtonInfo" IsChecked="True" Background="LightBlue" Content="Information" Click="RadioButtonInfo_Click"/>
-              <RadioButton x:Name="RadioButtonWarning" Background="Gold" Content="Warning" Margin="6,0,0,0" Click="RadioButtonWarning_Click"/>
-              <RadioButton x:Name="RadioButtonClosure" Background="Red" Content="Closure" Margin="6,0,0,0" Click="RadioButtonClosure_Click"/>
-            </StackPanel>
-            <TextBlock Text="Event Title" FontSize="14" Width="Auto" Foreground="Black" HorizontalAlignment="Left"/>
-            <TextBox x:Name="TitleField" MinWidth="100" MaxWidth="200" HorizontalAlignment="Left"
+          <Border HorizontalAlignment="Left" Grid.Row="1" Margin="6, 40, 6, 3" Width="Auto" Height="Auto">
+            <StackPanel Orientation="Vertical" Height="Auto">
+              <TextBlock Text="Event Type" FontSize="14"  Width="Auto" Foreground="Black" HorizontalAlignment="Left"/>
+              <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                <RadioButton x:Name="RadioButtonInfo" IsChecked="True" Background="LightBlue" Content="Information" Click="RadioButtonInfo_Click"/>
+                <RadioButton x:Name="RadioButtonWarning" Background="Gold" Content="Warning" Margin="6,0,0,0" Click="RadioButtonWarning_Click"/>
+                <RadioButton x:Name="RadioButtonClosure" Background="Red" Content="Closure" Margin="6,0,0,0" Click="RadioButtonClosure_Click"/>
+              </StackPanel>
+              <TextBlock Text="Event Title" FontSize="14" Width="Auto" Foreground="Black" HorizontalAlignment="Left"/>
+              <TextBox x:Name="TitleField" MinWidth="100" MaxWidth="200" HorizontalAlignment="Left"
                      Text="{Binding EventManagerViewModel.EventTitle, Source={StaticResource MapViewModel}}"/>
 
-            <TextBlock Margin="0,6,0,0" FontSize="14" Text="Event Description" Foreground="Black" 
+              <TextBlock Margin="0,6,0,0" FontSize="14" Text="Event Description" Foreground="Black" 
                        Height="Auto" HorizontalAlignment="Left"/>
-            <TextBox x:Name="DescField" MinHeight="200" Height="Auto" TextWrapping="Wrap"
+              <TextBox x:Name="DescField" MinHeight="200" Height="Auto" TextWrapping="Wrap"
                      Text="{Binding EventManagerViewModel.EventDescription, Source={StaticResource MapViewModel}}"/>
-            
-            <StackPanel Orientation="Horizontal" Margin="0, 3,0,0">
-              <Button x:Name="LocationButton" Width="120" Height="25"
+
+              <StackPanel Orientation="Horizontal" Margin="0, 3,0,0">
+                <Button x:Name="LocationButton" Width="120" Height="25"
                       Content="Set Location"  Margin="6,0,0,0" 
                       Click="LocationButton_Click"/>
               <Button x:Name="SendEventButton" Width="120" Height="25"
@@ -65,83 +87,56 @@
                       Click ="SendEventButton_Click" 
                       IsEnabled="{Binding EventManagerViewModel.CanSendEvent, Source={StaticResource MapViewModel}}"
                       Command="{Binding EventManagerViewModel.SendEventCmd, Source={StaticResource MapViewModel}}"/>
+              </StackPanel>
             </StackPanel>
-          </StackPanel>
-        </Border>
-        <!-- -->
-        <Border Grid.Row="2" Width="Auto" Height="Auto" MinHeight="40"/>
-        <StackPanel Grid.Row="3" Margin="6,6,0,0" Orientation="Vertical" >
-          <TextBlock Text="Heat Map" FontSize="14" Foreground="Black" Width="Auto" Height="Auto"/>
-          <StackPanel Orientation="Horizontal">
-          <Button Content="Refresh" Margin="0,0,6,0"
+          </Border>
+          <!-- -->
+          <Border Grid.Row="2" Width="Auto" Height="Auto" MinHeight="40"/>
+          <StackPanel Grid.Row="3" Margin="6,6,0,0" Orientation="Vertical" >
+            <TextBlock Text="Heat Map" FontSize="14" Foreground="Black" Width="Auto" Height="Auto"/>
+            <StackPanel Orientation="Horizontal">
+              <Button Content="Refresh" Margin="0,0,6,0"
                 Width="120" Height="25"
                 Command="{Binding ReloadHeatMapCommand, Source={StaticResource MapViewModel}}"/>
-            <ComboBox x:Name="HeatMapColor"
+              <ComboBox x:Name="HeatMapColor" Margin="0,0,6,0"
                 Width="Auto" Height="25"
                 SelectionChanged="ComboBox_SelectionChanged">
-              <ComboBoxItem IsSelected="True" Name="Heat">Heat</ComboBoxItem>
-              <ComboBoxItem Name="Blues">Blues</ComboBoxItem>
-            </ComboBox>
+                <ComboBoxItem IsSelected="True" Name="Heat">Heat</ComboBoxItem>
+                <ComboBoxItem Name="Blues">Blues</ComboBoxItem>
+              </ComboBox>
+              <CheckBox Margin="10" 
+                  IsChecked="{Binding AutoRefresh, Source={StaticResource MapViewModel}, Mode=TwoWay}" >
+                Auto refresh
+              </CheckBox>
+            </StackPanel>
           </StackPanel>
-        </StackPanel>
 
-        <Button Grid.Row="4" Margin="0,40,0,0"
+          <Button Grid.Row="4" Margin="0,40,0,0"
               Content="Load data"
               Width="120" Height="25"
               Click="LoadData_Click"
               Command="{Binding LoadFullMapCommand, Source={StaticResource MapViewModel}}"/>
-        <Button Grid.Row="4" Margin="10"
+          <Button Grid.Row="4" Margin="10"
               Content="Move staff"
               Width="120" Height="25"
               Command="{Binding MoveStaffCommand, Source={StaticResource MapViewModel}}"/>
-        <ListBox Grid.Row="5" ItemsSource="{Binding StafflocationsViewModel.StaffMoveHistory, Source={StaticResource MapViewModel}}" Height="150"/>
-        <!--<TextBlock Grid.Row="2" Text="{Binding GeometryString, Source={StaticResource MapViewModel}}" TextWrapping="Wrap"/>-->
-      
-      </Grid>
-      <GridSplitter Grid.Column="1"
+          <ListBox Grid.Row="5" ItemsSource="{Binding StafflocationsViewModel.StaffMoveHistory, Source={StaticResource MapViewModel}}" Height="150"/>
+          <!--<TextBlock Grid.Row="2" Text="{Binding GeometryString, Source={StaticResource MapViewModel}}" TextWrapping="Wrap"/>-->
+
+        </Grid>
+        <GridSplitter Grid.Column="1"
               HorizontalAlignment="Center"
               VerticalAlignment="Stretch"
               Background="Gray" 
               ShowsPreview="True"
               Width="5" />
-      <esri:MapView x:Name="EsriMapView" 
+        <esri:MapView x:Name="EsriMapView"
                     MouseLeftButtonDown="MapView_LeftMouseDown"
                     Grid.Column="2" Map="{Binding Map, Source={StaticResource MapViewModel}}" />
 
-    </Grid>
-    <GridSplitter Grid.Row="2"
-              HorizontalAlignment="Stretch"
-              VerticalAlignment="Center"
-              Background="Gray" 
-              ShowsPreview="True"
-              Height="5"/>
-    <Border Grid.Row="3" BorderBrush="#FF000000" BorderThickness="3" CornerRadius="8,8,8,8">
-      <DataGrid ItemsSource="{Binding StafflocationsViewModel.Locations, Source={StaticResource MapViewModel}, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" 
-                AutoGenerateColumns="False">
-        <DataGrid.Columns>
-          <DataGridTextColumn Header="Location" Binding="{Binding Name}"/>
-          <DataGridTextColumn Header="Additional staff needed" Binding="{Binding StaffNeeded}"/>
-          <DataGridTextColumn Header="Current Staffing" Binding="{Binding CurrentStaffing}"/>
-          <DataGridTextColumn Header="Users" Binding="{Binding UserCount}"/>
-        </DataGrid.Columns>
-          
-        <DataGrid.RowStyle>
-          <Style TargetType="DataGridRow">
-            <Style.Triggers>
-              <DataTrigger Binding="{Binding Understaffed, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" Value="true">
-                <Setter Property="Background" Value="#ffe552"></Setter>
-              </DataTrigger>
-              <DataTrigger Binding="{Binding Understaffed, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" Value="false">
-                <Setter Property="Background" Value="#2ed3cc"></Setter>
-              </DataTrigger>
-              <DataTrigger Binding="{Binding UrgentStaffRequired, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" Value="0">
-                <Setter Property="Background" Value="#fd78ad"></Setter>
-              </DataTrigger>
-            </Style.Triggers>
-          </Style>
-        </DataGrid.RowStyle>
-      </DataGrid>
-    </Border>
+      </Grid>
+
+    </DockPanel>
 
   </Grid>
 </Window>

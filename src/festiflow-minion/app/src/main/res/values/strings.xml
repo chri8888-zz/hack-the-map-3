@@ -7,6 +7,6 @@
     <string name="url_carparks">http://cardiffportal.esri.com/server/rest/services/Hosted/CarParks/FeatureServer/5</string>
     <string name="url_entrances">http://cardiffportal.esri.com/server/rest/services/Hosted/EntrancesStar/FeatureServer/1</string>
     <string name="url_campsites">http://cardiffportal.esri.com/server/rest/services/Hosted/Campsites/FeatureServer/3</string>
-    <string name="url_events">https://cardiffportal.esri.com/server/rest/services/Hosted/EventServiceWebMercator/FeatureServer/0</string>
-    <string name="url_users">https://cardiffportal.esri.com/server/rest/services/Hosted/FestiFlowUserService/FeatureServer/0</string>
+    <string name="url_events">https://cardiffportal.esri.com/server/rest/services/Hosted/EventServiceEventType/FeatureServer</string>
+    <string name="url_users">https://cardiffportal.esri.com/server/rest/services/Hosted/EventServiceEventType/FeatureServer/0</string>
 </resources>
