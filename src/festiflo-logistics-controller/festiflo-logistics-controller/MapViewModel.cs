@@ -505,11 +505,12 @@ namespace festiflo_logistics_controller
         return _sendEventCommand;
       }
     }
-    #endregion
 
+    #endregion
     private async void SendEvent()
     {
       var newEvent = new EventData() { ID = _nextID++, Name = _eventTitle, Description = _eventDesc, X = _eventLocation.X, Y = _eventLocation.Y, EventType = _eventType };
+
       var rreq = new RestRequest();
       await rreq.CreateEvent(newEvent);
 
@@ -518,6 +519,12 @@ namespace festiflo_logistics_controller
       EventTitle = "";
       EventDescription = "";
       EventLocation = null;
+    }
+
+    public async Task PollEvents()
+    {
+      var rreq = new RestRequest();
+      ActiveEvents = await rreq.QueryEvents();
     }
   }
 }

@@ -282,15 +282,18 @@ namespace festiflo_logistics_controller
       _previewTextGraphic = null;
     }
 
-    private void LoadEvents()
+    private async Task LoadEvents()
     {
       if (_border.DataContext is MapViewModel mapVM)
       {
+        await mapVM.EventManagerViewModel.PollEvents();
+
         foreach (var graphicSet in _activeGraphics)
         {
           _clickEventOverlay.Graphics.Remove(graphicSet.Item1);
           _clickEventOverlay.Graphics.Remove(graphicSet.Item2);
         }
+        _activeGraphics.Clear();
 
         var eventList = mapVM.EventManagerViewModel.ActiveEvents;
         foreach (var e in eventList)
@@ -304,9 +307,9 @@ namespace festiflo_logistics_controller
       }
     }
 
-    private void LoadData_Click(object sender, RoutedEventArgs e)
+    private async void LoadData_Click(object sender, RoutedEventArgs e)
     {
-      LoadEvents();
+      await LoadEvents();
     }
 
     // Map initialization logic is contained in MapViewModel.cs
