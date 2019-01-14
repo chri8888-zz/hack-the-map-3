@@ -94,8 +94,9 @@ namespace festiflo_logistics_controller
         _operationalLayer = new FeatureLayer(new Uri(url));
         await _operationalLayer.LoadAsync();
       }
-      catch (Exception)
+      catch (Exception e)
       {
+        Console.Write(e);
         return _operationalLayer;
       }
 

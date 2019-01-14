@@ -39,6 +39,7 @@
           </Label.Effect>
           <Label.Content>FestiFlo</Label.Content>
         </Label>
+        <CheckBox IsChecked="{Binding AutoRefresh, Source={StaticResource MapViewModel}, Mode=TwoWay}" >Auto refresh</CheckBox>
         <Button Grid.Row="1"
               Content="Load data"
               Width="120" Height="25"
@@ -51,7 +52,7 @@
               Content="Move staff"
               Width="120" Height="25"
               Command="{Binding MoveStaffCommand, Source={StaticResource MapViewModel}}"/>
-        <ListBox Grid.Row="4" ItemsSource="{Binding StafflocationsViewModel.StaffMoveHistory, Source={StaticResource MapViewModel}}"/>
+        <ListBox Grid.Row="4" ItemsSource="{Binding StafflocationsViewModel.StaffMoveHistory, Source={StaticResource MapViewModel}}" Height="150"/>
         <!--<TextBlock Grid.Row="2" Text="{Binding GeometryString, Source={StaticResource MapViewModel}}" TextWrapping="Wrap"/>-->
       
         </Grid>
@@ -85,10 +86,13 @@
           <Style TargetType="DataGridRow">
             <Style.Triggers>
               <DataTrigger Binding="{Binding Understaffed, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" Value="true">
-                <Setter Property="Background" Value="#fd78ad"></Setter>
+                <Setter Property="Background" Value="#ffe552"></Setter>
               </DataTrigger>
               <DataTrigger Binding="{Binding Understaffed, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" Value="false">
                 <Setter Property="Background" Value="#2ed3cc"></Setter>
+              </DataTrigger>
+              <DataTrigger Binding="{Binding UrgentStaffRequired, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" Value="0">
+                <Setter Property="Background" Value="#fd78ad"></Setter>
               </DataTrigger>
             </Style.Triggers>
           </Style>

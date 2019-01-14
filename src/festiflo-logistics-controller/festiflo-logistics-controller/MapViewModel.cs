@@ -17,6 +17,7 @@ using HeatMapRendererJson;
 using System.Windows.Media;
 using System.Windows.Input;
 using System.Collections.ObjectModel;
+using System.Threading;
 
 namespace festiflo_logistics_controller
 {
@@ -42,7 +43,19 @@ namespace festiflo_logistics_controller
     {
       LoadHeatMap();
       updateStaffUserCounts();
+
+//      Thread mapRefresher = new Thread(new ThreadStart(MapRefreshTimer));
+//      mapRefresher.Start();
     }
+
+    private bool _autoRefresh = true;
+
+    public bool AutoRefresh
+    {
+      get { return _autoRefresh; }
+      set { _autoRefresh = value; }
+    }
+
 
     private Map _map = new Map(BasemapType.ImageryWithLabelsVector, 51.155, -2.585, 14);
 
@@ -53,6 +66,17 @@ namespace festiflo_logistics_controller
     {
       get { return _map; }
       set { _map = value; OnPropertyChanged(); }
+    }
+
+    void MapRefreshTimer()
+    {
+      while (true)
+      {
+        while (AutoRefresh)
+          reloadHeatMap();
+        Thread.Sleep(1000 * 15); // 5 Minutes
+                                 //Have a break condition
+      }
     }
 
     private string geomCount;
@@ -193,7 +217,7 @@ namespace festiflo_logistics_controller
     private static string _entrancesURL = "http://cardiffportal.esri.com/server/rest/services/Hosted/EntrancesStar/FeatureServer/1"; // "http://cardiffportal.esri.com/server/rest/services/Hosted/Entrances/FeatureServer/1";
     private static string _campsitesURL = "http://cardiffportal.esri.com/server/rest/services/Hosted/Campsites/FeatureServer/3";
 
-    private int totalStaff = 40;
+    private int totalStaff = 45;
     private int freeStaff
     {
       get => totalStaff - (_locations.Sum(location => location.CurrentStaffing));
@@ -254,13 +278,22 @@ namespace festiflo_logistics_controller
     public void MoveStaff()
     {
       FreeStaff();
-      foreach (var loc in Locations.Where(location => location.Understaffed).ToList())
+      foreach (var loc in Locations.Where(location => location.Understaffed).ToList().OrderBy(loc => loc.StaffNeeded / (loc.CurrentStaffing == 0 ? 0.00001 : loc.CurrentStaffing)))
       {
         var movingStaff = ((freeStaff > loc.StaffNeeded) ? loc.StaffNeeded : freeStaff);
         if (movingStaff > 0)
         {
           StaffMoveHistory.Insert(0, DateTime.Now + " - " + loc.Name + ": " + movingStaff + " staff added.");
           loc.CurrentStaffing += movingStaff;
+        }
+        else if (loc.CurrentStaffing == 0)
+        {
+          var bestRatio = Locations.Select(x => x.CurrentStaffing / (x.StaffNeeded == 0 ? 1000 : x.StaffNeeded)).Min();
+          var bestLoc = Locations.Where(x => x.CurrentStaffing / (x.StaffNeeded == 0 ? 1000 : x.StaffNeeded) == bestRatio).FirstOrDefault();
+          StaffMoveHistory.Insert(0, DateTime.Now + " - " + loc.Name + ": " + Math.Abs(loc.StaffNeeded) + " staff removed.");
+          bestLoc.CurrentStaffing--;
+          StaffMoveHistory.Insert(0, DateTime.Now + " - " + loc.Name + ": " + 1 + " staff added.");
+          loc.CurrentStaffing++;
         }
         if (freeStaff == 0 && StaffMoveHistory.Count != 0 && !StaffMoveHistory[0].Contains("No more free staff"))
           StaffMoveHistory.Insert(0, DateTime.Now + " - No more free staff");
@@ -301,6 +334,7 @@ namespace festiflo_logistics_controller
       public event PropertyChangedEventHandler PropertyChanged;
 
       public bool Understaffed { get => StaffNeeded > 0; }
+      public bool UrgentStaffRequired { get => StaffNeeded > 0 && CurrentStaffing < 1; }
 
       LocationType _locationType;
       int _currentStaffing;
@@ -309,6 +343,8 @@ namespace festiflo_logistics_controller
         get => _currentStaffing;
         set
         {
+          if (value < 0)
+            return;
           _currentStaffing = value;
           OnPropertyChanged(nameof(CurrentStaffing));
           OnPropertyChanged(nameof(StaffNeeded));
@@ -317,7 +353,8 @@ namespace festiflo_logistics_controller
       }
       int _userCount;
       public int UserCount
-      { get => _userCount;
+      {
+        get => _userCount;
         set
         {
           _userCount = value;
