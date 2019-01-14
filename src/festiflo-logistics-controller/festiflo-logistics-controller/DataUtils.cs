@@ -117,7 +117,7 @@ namespace festiflo_logistics_controller
     }
 
 
-    public static Renderer GetHeatmapRenderer(long blurRadius = 14, long minPixelIntensity = 0, long maxPixelIntensity = 100, IList<(double ratio, Color color)> colorStops = null)
+    public static Renderer GetHeatmapRenderer(long blurRadius = 14, long minPixelIntensity = 0, long maxPixelIntensity = 100, DataUtils.ColorPalletteType type = DataUtils.ColorPalletteType.Heat)
     {
       // Create a new HeatMapRenderer with info provided by the user.
       HeatMapRenderer heatMapRendererInfo = new HeatMapRenderer
@@ -128,12 +128,9 @@ namespace festiflo_logistics_controller
       };
 
       // Add the chosen color stops (plus transparent for empty areas).
-      colorStops = colorStops ?? GetColorStops(); //defaultColorStops;
+      var colorStops = GetColorStops(type); //defaultColorStops;
       foreach (var (ratio, color) in colorStops)
-      {
         heatMapRendererInfo.AddColorStop(ratio, color);
-      }
-
 
       // Get the JSON representation of the renderer class.
       string heatMapJson = heatMapRendererInfo.ToJson();

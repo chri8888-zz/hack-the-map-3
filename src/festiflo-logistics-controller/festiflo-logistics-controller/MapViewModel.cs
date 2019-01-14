@@ -100,6 +100,7 @@ namespace festiflo_logistics_controller
       {
         _heatMapColor = value;
         OnPropertyChanged(nameof(HeatMapColorPallette));
+        reloadHeatMap();
       }
     }
 
@@ -118,12 +119,12 @@ namespace festiflo_logistics_controller
 
     public async void LoadHeatMap()
     {
-      await DataUtils.AddOperationalLayerAsync(_map, _userDataUrl, DataUtils.GetHeatmapRenderer(colorStops: DataUtils.GetColorStops(_heatMapColor)));
+      await DataUtils.AddOperationalLayerAsync(_map, _userDataUrl, DataUtils.GetHeatmapRenderer(type:_heatMapColor));
     }
 
     public async void ReloadLayers()
     {
-      await DataUtils.AddOperationalLayerAsync(_map, _userDataUrl, DataUtils.GetHeatmapRenderer(colorStops: DataUtils.GetColorStops(_heatMapColor)));
+      await DataUtils.AddOperationalLayerAsync(_map, _userDataUrl, DataUtils.GetHeatmapRenderer(type:_heatMapColor));
       await DataUtils.AddOperationalLayerAsync(_map, _campsitesURL);
       await DataUtils.AddOperationalLayerAsync(_map, _carParksURL);
       await DataUtils.AddOperationalLayerAsync(_map, _toiletsURL);
@@ -150,7 +151,7 @@ namespace festiflo_logistics_controller
 
     public void reloadHeatMap()
     {
-      DataUtils.AddOrReplaceOperationalLayerAsync(_map, _userDataUrl, DataUtils.GetHeatmapRenderer());
+      DataUtils.AddOrReplaceOperationalLayerAsync(_map, _userDataUrl, DataUtils.GetHeatmapRenderer(type: HeatMapColorPallette));
       updateStaffUserCounts();
     }
 
@@ -424,6 +425,10 @@ namespace festiflo_logistics_controller
     {
       // do stuff with 
       var newEvent = new EventViewModel(_eventTitle, _eventDesc, _eventLocation, _eventType);
+
+      EventTitle = "";
+      EventDescription = "";
+      EventLocation = null;
     }
   }
 

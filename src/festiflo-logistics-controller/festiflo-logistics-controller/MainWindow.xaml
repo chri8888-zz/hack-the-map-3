@@ -38,7 +38,7 @@
 
         <Border  x:Name="_border" Visibility="Collapsed"
                  DataContext="{StaticResource MapViewModel}"/>
-        <Border HorizontalAlignment="Left" Grid.Row="1" Margin="40, 3, 6, 3" Width="Auto" Height="Auto">
+        <Border HorizontalAlignment="Left" Grid.Row="1" Margin="6, 40, 6, 3" Width="Auto" Height="Auto">
           <StackPanel Orientation="Vertical" Height="Auto">
             <TextBlock Text="Event Type" FontSize="14"  Width="Auto" Foreground="Black" HorizontalAlignment="Left"/>
             <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
@@ -60,24 +60,21 @@
                       Content="Set Location"  Margin="6,0,0,0" 
                       Click="LocationButton_Click"/>
               <Button x:Name="SendEventButton" Width="120" Height="25"
-                      Content="Send Event" Command="{Binding EventManagerViewModel.SendEventCmd, Source={StaticResource MapViewModel}}"/>
+                      Content="Send Event" IsEnabled="{Binding EventManagerViewModel.CanSendEvent, Source={StaticResource MapViewModel}}"
+                      Command="{Binding EventManagerViewModel.SendEventCmd, Source={StaticResource MapViewModel}}"/>
             </StackPanel>
           </StackPanel>
         </Border>
         <!-- -->
         <Border Grid.Row="2" Width="Auto" Height="Auto" MinHeight="40"/>
-        <Button Grid.Row="3"
-              Content="Load data"
-              Width="120" Height="25"
-              Command="{Binding LoadFullMapCommand, Source={StaticResource MapViewModel}}"/>
-        <StackPanel Orientation="Horizontal" Grid.Row="4">
-          <Button Content="Refresh heat map"
+        <StackPanel Grid.Row="3" Margin="6,6,0,0" Orientation="Vertical" >
+          <TextBlock Text="Heat Map" FontSize="14" Foreground="Black" Width="Auto" Height="Auto"/>
+          <StackPanel Orientation="Horizontal">
+          <Button Content="Refresh" Margin="0,0,6,0"
                 Width="120" Height="25"
                 Command="{Binding ReloadHeatMapCommand, Source={StaticResource MapViewModel}}"/>
-          <StackPanel Grid.Row="5" Orientation="Horizontal" >
-            <TextBlock Text="Heatmap Color" />
             <ComboBox x:Name="HeatMapColor"
-                Width="120" Height="25"
+                Width="Auto" Height="25"
                 SelectionChanged="ComboBox_SelectionChanged">
               <ComboBoxItem IsSelected="True" Name="Heat">Heat</ComboBoxItem>
               <ComboBoxItem Name="Blues">Blues</ComboBoxItem>
@@ -85,6 +82,11 @@
           </StackPanel>
         </StackPanel>
 
+        <Button Grid.Row="4" Margin="0,40,0,0"
+              Content="Load data"
+              Width="120" Height="25"
+              Command="{Binding LoadFullMapCommand, Source={StaticResource MapViewModel}}"/>
+        
         <!--<TextBlock Grid.Row="2" Text="{Binding GeometryString, Source={StaticResource MapViewModel}}" TextWrapping="Wrap"/>-->
       </Grid>
       <GridSplitter Grid.Column="1"

@@ -85,7 +85,7 @@ namespace festiflo_logistics_controller
           else if (type == EventsManagerViewModel.EventType.Warning)
           {
             markerSym = _warningSymbol;
-            textColor = System.Drawing.Color.LightYellow;
+            textColor = System.Drawing.Color.Orange;
           }
           else if (type == EventsManagerViewModel.EventType.Closure)
           {
