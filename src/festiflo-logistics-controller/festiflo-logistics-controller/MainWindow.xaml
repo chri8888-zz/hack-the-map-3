@@ -25,23 +25,43 @@
       </Grid.ColumnDefinitions>
       <Grid Grid.Column="0">
         <Grid.RowDefinitions>
-          <RowDefinition/>
-          <RowDefinition/>
-          <RowDefinition/>
-          <RowDefinition/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Label Grid.Row="0" FontFamily="Tahoma" FontSize="24">
           <Label.Effect>
-            <DropShadowEffect BlurRadius="10" ShadowDepth="0" Opacity="1" 
-                      Color="White"/>
+            <DropShadowEffect BlurRadius="10" ShadowDepth="0" Opacity="1" Color="White"/>
           </Label.Effect>
           <Label.Content>FestiFlo</Label.Content>
         </Label>
-        <Button Grid.Row="1"
+        <!-- -->
+        <Border Grid.Row="1" Margin="6, 3, 6, 3" Width="Auto" Height="Auto">
+          <StackPanel Orientation="Vertical" Height="Auto">
+            <TextBlock Text="Event Title" Width="Auto" Foreground="Black" HorizontalAlignment="Left"/>
+            <TextBox x:Name="TitleField" MinWidth="100" MaxWidth="200" HorizontalAlignment="Left"/>
+            
+            <TextBlock Margin="0,6,0,0" Text="Event Description" Foreground="Black" 
+                       Height="Auto"  MaxWidth="100" HorizontalAlignment="Left"/>
+            <TextBox x:Name="DescField" MinHeight="200" Height="Auto" TextWrapping="Wrap"/>
+            
+            <StackPanel Orientation="Horizontal" Margin="0, 3,0,0">
+              <Button x:Name="LocationButton" Width="120" Height="25"
+                      Content="Set Location"  Margin="6,0,0,0"/>
+              <Button x:Name="SendEventButton" Width="120" Height="25"
+                      Content="Send Event" />
+            </StackPanel>
+          </StackPanel>
+        </Border>
+        <!-- -->
+        <Border Grid.Row="2" Width="Auto" Height="Auto" MinHeight="40"/>
+        <Button Grid.Row="3"
               Content="Load data"
               Width="120" Height="25"
               Command="{Binding LoadFullMapCommand, Source={StaticResource MapViewModel}}"/>
-        <Button Grid.Row="2"
+        <Button Grid.Row="4"
               Content="Refresh heat map"
               Width="120" Height="25"
               Command="{Binding ReloadHeatMapCommand, Source={StaticResource MapViewModel}}"/>
