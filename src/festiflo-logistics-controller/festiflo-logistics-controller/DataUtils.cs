@@ -76,8 +76,13 @@ namespace festiflo_logistics_controller
       var operationaLayer = await GetLayer(url, renderer);
       var layer = map.OperationalLayers.FirstOrDefault((x) => x.Name == operationaLayer.Name);
       if (layer != null)
-        map.OperationalLayers.Remove(layer);
-      map.OperationalLayers.Add(operationaLayer);
+      {
+        var index = map.OperationalLayers.IndexOf(layer);
+        map.OperationalLayers.Insert(index + 1, operationaLayer);
+        Task.Delay(2000).ContinueWith(t => map.OperationalLayers.Remove(layer));
+      }
+      else
+        map.OperationalLayers.Add(operationaLayer);
     }
 
 
@@ -89,8 +94,9 @@ namespace festiflo_logistics_controller
         _operationalLayer = new FeatureLayer(new Uri(url));
         await _operationalLayer.LoadAsync();
       }
-      catch (Exception)
+      catch (Exception e)
       {
+        Console.Write(e);
         return _operationalLayer;
       }
 
