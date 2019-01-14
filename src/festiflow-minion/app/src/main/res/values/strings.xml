@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Festiflo-minion</string>
+    <string name="app_name">FestiFlo</string>
     <string name="action_settings">Settings</string>
 
     <string name="url_toilets">http://cardiffportal.esri.com/server/rest/services/Hosted/ToiletsWGS/FeatureServer/0</string>
