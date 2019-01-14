@@ -6,26 +6,69 @@
         xmlns:esri="http://schemas.esri.com/arcgis/runtime/2013"
         xmlns:local="clr-namespace:festiflo_logistics_controller"
         mc:Ignorable="d"
-        Title="MainWindow" Height="650" Width="900">
+        Title="FestiFlo MS" Height="650" Width="900" Background="#fd78adff" Foreground="#4551c7ff " BorderBrush="#ffe552ff">
   <Window.Resources>
     <local:MapViewModel x:Key="MapViewModel" />
   </Window.Resources>
   <Grid>
-    <Grid.ColumnDefinitions>
-      <ColumnDefinition Width="200"/>
-      <ColumnDefinition/>
-    </Grid.ColumnDefinitions>
-    <Grid Grid.Column="0">
-      <Grid.RowDefinitions>
-        <RowDefinition/>
-        <RowDefinition/>
-      </Grid.RowDefinitions>
-      <Button Grid.Row="0"
-              Content="Refresh data"
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition/>
+    </Grid.RowDefinitions>
+    <Grid Grid.Row="1">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="400"/>
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition/>
+      </Grid.ColumnDefinitions>
+      <Grid Grid.Column="0">
+        <Grid.RowDefinitions>
+          <RowDefinition/>
+          <RowDefinition/>
+          <RowDefinition/>
+          <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Label Grid.Row="0" FontFamily="Tahoma" FontSize="24">
+          <Label.Effect>
+            <DropShadowEffect BlurRadius="10" ShadowDepth="0" Opacity="1" 
+                      Color="White"/>
+          </Label.Effect>
+          <Label.Content>FestiFlo</Label.Content>
+        </Label>
+        <Button Grid.Row="1"
+              Content="Load data"
+              Width="120" Height="25"
+              Command="{Binding LoadFullMapCommand, Source={StaticResource MapViewModel}}"/>
+        <Button Grid.Row="2"
+              Content="Refresh heat map"
               Width="120" Height="25"
               Command="{Binding ReloadHeatMapCommand, Source={StaticResource MapViewModel}}"/>
-      <TextBlock Grid.Row="1" Text="{Binding GeometryString, Source={StaticResource MapViewModel}}" TextWrapping="Wrap"/>
+        <!--<TextBlock Grid.Row="2" Text="{Binding GeometryString, Source={StaticResource MapViewModel}}" TextWrapping="Wrap"/>-->
+      </Grid>
+      <GridSplitter Grid.Column="1"
+              HorizontalAlignment="Center"
+              VerticalAlignment="Stretch"
+              Background="Gray" 
+              ShowsPreview="True"
+              Width="5"
+              />
+      <esri:MapView Grid.Column="2" Map="{Binding Map, Source={StaticResource MapViewModel}}" />
+
     </Grid>
-    <esri:MapView Grid.Column="1" Map="{Binding Map, Source={StaticResource MapViewModel}}" />
+    <GridSplitter Grid.Row="2"
+              HorizontalAlignment="Stretch"
+              VerticalAlignment="Center"
+              Background="Gray" 
+              ShowsPreview="True"
+              Height="5"/>
+    <Border Grid.Row="3" BorderBrush="#FF000000" BorderThickness="3" CornerRadius="8,8,8,8">
+      <DataGrid ItemsSource="{Binding StafflocationsViewModel.Locations, Source={StaticResource MapViewModel}}">
+        <DataGrid.Columns>
+        </DataGrid.Columns>
+      </DataGrid>
+    </Border>
+
   </Grid>
 </Window>
