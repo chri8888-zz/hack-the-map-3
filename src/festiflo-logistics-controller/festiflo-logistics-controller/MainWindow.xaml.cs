@@ -263,14 +263,19 @@ namespace festiflo_logistics_controller
     {
       foreach (var loc in _mapVM?.StafflocationsViewModel?.Locations)
       {
-        SimpleMarkerSymbol marker = new SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Circle, System.Drawing.Color.LightYellow, loc.CurrentStaffing > 20 ? loc.CurrentStaffing : 20);
+        SimpleMarkerSymbol marker = new SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Circle, System.Drawing.Color.DarkBlue, loc.CurrentStaffing > 10 ? loc.CurrentStaffing : 10);
+
+        var urgentStaffColor = System.Drawing.Color.FromArgb(0xfd, 0x78, 0xad);
+        var goodColor = System.Drawing.Color.FromArgb(0x2e, 0xd3, 0xcc);
+        var understaffedColor = System.Drawing.Color.FromArgb(0xff, 0xe5, 0x52);
 
         var textSym = new TextSymbol()
         {
           Text = loc.CurrentStaffing.ToString(),
-          Color = System.Drawing.Color.DarkViolet,
-          HaloColor = System.Drawing.Color.White,
-          HaloWidth = 2,
+          FontWeight = Esri.ArcGISRuntime.Symbology.FontWeight.Bold,
+          Color = loc.UrgentStaffRequired ? urgentStaffColor : (loc.Understaffed ? understaffedColor : goodColor),
+          HaloColor = System.Drawing.Color.DarkBlue,
+          HaloWidth = 1,
           Size = loc.CurrentStaffing > 20 ? loc.CurrentStaffing : 20,
           HorizontalAlignment = Esri.ArcGISRuntime.Symbology.HorizontalAlignment.Left,
           VerticalAlignment = Esri.ArcGISRuntime.Symbology.VerticalAlignment.Bottom
