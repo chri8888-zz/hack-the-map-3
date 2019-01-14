@@ -145,6 +145,7 @@ namespace festiflo_logistics_controller
     }
 
 
+    // Heatmap renderer credit: https://community.esri.com/thread/188830-heatmap-presenting-data-in-runtime-10000
     public static Renderer GetHeatmapRenderer(byte opacity = 255, long blurRadius = 14, long minPixelIntensity = 0, long maxPixelIntensity = 100, DataUtils.ColorPalletteType type = DataUtils.ColorPalletteType.Heat)
     {
       // Create a new HeatMapRenderer with info provided by the user.
