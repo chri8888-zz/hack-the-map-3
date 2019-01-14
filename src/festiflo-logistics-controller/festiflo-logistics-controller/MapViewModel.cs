@@ -70,6 +70,16 @@ namespace festiflo_logistics_controller
       set { geomCount = value; }
     }
 
+    private DataUtils.ColorPalletteType _heatMapColor;
+    public DataUtils.ColorPalletteType HeatMapColorPallette
+    {
+      get => _heatMapColor;
+      set
+      {
+        _heatMapColor = value;
+        OnPropertyChanged(nameof(HeatMapColorPallette));
+      }
+    }
 
 
     /// <summary>
@@ -78,9 +88,7 @@ namespace festiflo_logistics_controller
     /// <param name="propertyName">The name of the property that has changed</param>
     protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
     {
-      var propertyChangedHandler = PropertyChanged;
-      if (propertyChangedHandler != null)
-        propertyChangedHandler(this, new PropertyChangedEventArgs(propertyName));
+      PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
     public event PropertyChangedEventHandler PropertyChanged;
@@ -88,12 +96,12 @@ namespace festiflo_logistics_controller
 
     public async void LoadHeatMap()
     {
-      await DataUtils.AddOperationalLayerAsync(_map, _userDataUrl, DataUtils.GetHeatmapRenderer());
+      await DataUtils.AddOperationalLayerAsync(_map, _userDataUrl, DataUtils.GetHeatmapRenderer(colorStops: DataUtils.GetColorStops(_heatMapColor)));
     }
 
     public async void ReloadLayers()
     {
-      await DataUtils.AddOperationalLayerAsync(_map, _userDataUrl, DataUtils.GetHeatmapRenderer());
+      await DataUtils.AddOperationalLayerAsync(_map, _userDataUrl, DataUtils.GetHeatmapRenderer(colorStops: DataUtils.GetColorStops(_heatMapColor)));
       await DataUtils.AddOperationalLayerAsync(_map, _campsitesURL);
       await DataUtils.AddOperationalLayerAsync(_map, _carParksURL);
       await DataUtils.AddOperationalLayerAsync(_map, _toiletsURL);

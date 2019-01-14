@@ -13,10 +13,10 @@ using System.Windows.Media;
 
 namespace festiflo_logistics_controller
 {
-  class DataUtils
+  public class DataUtils
   {
     #region ColorStops
-    internal enum ColorPalletteType
+    public enum ColorPalletteType
     {
       Heat = 0,
       Blues = 1
@@ -63,19 +63,6 @@ namespace festiflo_logistics_controller
       Color.FromRgb(186, 210, 235),
       Color.FromRgb(235, 240, 255),
     };
-
-    private static readonly IList<(double ratio, Color color)> defaultColorStops = new ReadOnlyCollection<(double, Color)>
-      (new List<(double, Color)> {
-        { (0.0, Colors.Transparent) },
-        { (0.02, Color.FromArgb(51, 238, 17, 17)) },
-        { (0.02, Color.FromArgb(51, 238, 17, 17)) },
-        { (0.02, Color.FromArgb(51, 238, 17, 17)) },
-        { (0.02, Color.FromArgb(51, 238, 17, 17)) },
-        { (0.02, Color.FromArgb(51, 238, 62, 17)) },
-        { (0.02, Color.FromArgb(51, 122, 0, 45)) },
-        //{ (0.1, Color.FromArgb(255, 238, 17, 17)) },
-        //{ (1.0, Color.FromArgb(255, 238, 17, 17)) }
-      });
     #endregion
 
     public static async Task AddOperationalLayerAsync(Map map, string url, Renderer renderer = null)
