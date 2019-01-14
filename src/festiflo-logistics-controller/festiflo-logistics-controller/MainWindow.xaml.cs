@@ -68,15 +68,38 @@ namespace festiflo_logistics_controller
         var mapRelativeLoc = mapView.ScreenToLocation(mousePos);
 
         if (_eventPlacementMode)
-        { 
+        {
           _mapVM.EventManagerViewModel.EventLocation = mapRelativeLoc;
+          var type = _mapVM.EventManagerViewModel.SelectedEventType;
 
-          var markerSym = new SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Circle, System.Drawing.Color.Red, 12);
-          var textSym = new TextSymbol(_mapVM.EventManagerViewModel.EventTitle,
-                          System.Drawing.Color.Red,
-                          12,
-                          Esri.ArcGISRuntime.Symbology.HorizontalAlignment.Left,
-                          Esri.ArcGISRuntime.Symbology.VerticalAlignment.Bottom);
+          var textColor = System.Drawing.Color.Red;
+          SimpleMarkerSymbol markerSym = null;
+          if (type == EventsManagerViewModel.EventType.Information)
+          {
+            markerSym = _infoSymbol;
+            textColor = System.Drawing.Color.DarkBlue;
+          }
+          else if (type == EventsManagerViewModel.EventType.Warning)
+          {
+            markerSym = _warningSymbol;
+            textColor = System.Drawing.Color.LightYellow;
+          }
+          else if (type == EventsManagerViewModel.EventType.Closure)
+          {
+            markerSym = _closureSymbol;
+            textColor = System.Drawing.Color.Red;
+          }
+
+          var textSym = new TextSymbol()
+          {
+            Text = _mapVM.EventManagerViewModel.EventTitle,
+            Color = textColor,
+            HaloColor = System.Drawing.Color.White,
+            HaloWidth = 2,
+            Size = 14,
+            HorizontalAlignment = Esri.ArcGISRuntime.Symbology.HorizontalAlignment.Left,
+            VerticalAlignment = Esri.ArcGISRuntime.Symbology.VerticalAlignment.Bottom
+          };
 
           var markerGraphic = new Graphic(mapRelativeLoc, markerSym);
           var textGraphic = new Graphic(mapRelativeLoc, textSym);

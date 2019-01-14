@@ -58,7 +58,7 @@
                       Content="Set Location"  Margin="6,0,0,0" 
                       Click="LocationButton_Click"/>
               <Button x:Name="SendEventButton" Width="120" Height="25"
-                      Content="Send Event" />
+                      Content="Send Event" Command="{Binding EventManagerViewModel.SendEventCmd, Source={StaticResource MapViewModel}}"/>
             </StackPanel>
           </StackPanel>
         </Border>

@@ -324,10 +324,7 @@ namespace festiflo_logistics_controller
 
   public class EventsManagerViewModel : INotifyPropertyChanged
   {
-    public EventsManagerViewModel()
-    {
-      InitializeAsync();
-    }
+    public EventsManagerViewModel(){ }
 
     /// <summary>
     /// Raises the <see cref="EventsManagerViewModel.PropertyChanged" /> event
@@ -339,11 +336,6 @@ namespace festiflo_logistics_controller
     }
 
     public event PropertyChangedEventHandler PropertyChanged;
-
-    private void InitializeAsync()
-    {
-
-    }
 
     public enum EventType
     {
@@ -363,6 +355,7 @@ namespace festiflo_logistics_controller
       {
         _eventTitle = value;
         NotifyPropertyChanged(nameof(EventTitle));
+        NotifyPropertyChanged(nameof(CanSendEvent));
       }
     }
 
@@ -374,10 +367,11 @@ namespace festiflo_logistics_controller
       {
         _eventDesc = value;
         NotifyPropertyChanged(nameof(EventDescription));
+        NotifyPropertyChanged(nameof(CanSendEvent));
       }
     }
 
-    private MapPoint _eventLocation = new MapPoint(0, 0);
+    private MapPoint _eventLocation = null;
     public MapPoint EventLocation
     {
       get => _eventLocation;
@@ -385,20 +379,62 @@ namespace festiflo_logistics_controller
       {
         _eventLocation = value;
         NotifyPropertyChanged(nameof(EventLocation));
+        NotifyPropertyChanged(nameof(CanSendEvent));
+      }
+    }
+
+    private EventType _eventType = EventType.Information;
+    public EventType SelectedEventType
+    {
+      get => _eventType;
+      set
+      {
+        _eventType = value;
+        NotifyPropertyChanged(nameof(SelectedEventType));
+        NotifyPropertyChanged(nameof(CanSendEvent));
+      }
+    }
+
+    public bool CanSendEvent
+    {
+      get
+      {
+        if (_eventTitle != "" && _eventDesc != "" && _eventLocation != null)
+          return true;
+        return false;
       }
     }
 
     // Event timer
     // Event symbol
     #endregion
+
+    #region commands
+    private DelegateCommand _sendEventCommand;
+    public ICommand SendEventCmd
+    {
+      get
+      {
+        if (_sendEventCommand == null)
+          _sendEventCommand = new DelegateCommand(new Action(SendEvent));
+        return _sendEventCommand;
+      }
+    }
+    #endregion
+
+    private void SendEvent()
+    {
+      // do stuff with 
+      var newEvent = new EventViewModel(_eventTitle, _eventDesc, _eventLocation, _eventType);
+    }
   }
 
   public class EventViewModel
   {
-    public string Title { get; private set; }
-    public string Description { get; private set; }
-    public MapPoint Location { get; private set; }
-    public EventsManagerViewModel.EventType Type { get; private set; }
+    public string Title { get; set; }
+    public string Description { get; set; }
+    public MapPoint Location { get; set; }
+    public EventsManagerViewModel.EventType Type { get; set; }
     //timer
     //type
 
