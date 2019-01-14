@@ -106,6 +106,12 @@ namespace festiflo_logistics_controller
       }
     }
 
+    private byte _opacity = 255;
+    public byte HeatMapOpacity
+    {
+      get => _opacity;
+      set => _opacity = value;
+    }
 
     /// <summary>
     /// Raises the <see cref="MapViewModel.PropertyChanged" /> event
@@ -121,12 +127,12 @@ namespace festiflo_logistics_controller
 
     public async void LoadHeatMap()
     {
-      await DataUtils.AddOperationalLayerAsync(_map, _userDataUrl, DataUtils.GetHeatmapRenderer(type:_heatMapColor));
+      await DataUtils.AddOperationalLayerAsync(_map, _userDataUrl, DataUtils.GetHeatmapRenderer(opacity: HeatMapOpacity, type:_heatMapColor));
     }
 
     public async void ReloadLayers()
     {
-      await DataUtils.AddOperationalLayerAsync(_map, _userDataUrl, DataUtils.GetHeatmapRenderer(type:_heatMapColor));
+      await DataUtils.AddOperationalLayerAsync(_map, _userDataUrl, DataUtils.GetHeatmapRenderer(opacity: HeatMapOpacity, type:_heatMapColor));
       await DataUtils.AddOperationalLayerAsync(_map, _campsitesURL);
       await DataUtils.AddOperationalLayerAsync(_map, _carParksURL);
       await DataUtils.AddOperationalLayerAsync(_map, _toiletsURL);
@@ -147,7 +153,7 @@ namespace festiflo_logistics_controller
 
     public void reloadHeatMap()
     {
-      DataUtils.AddOrReplaceOperationalLayerAsync(_map, _userDataUrl, DataUtils.GetHeatmapRenderer(type: HeatMapColorPallette));
+      DataUtils.AddOrReplaceOperationalLayerAsync(_map, _userDataUrl, DataUtils.GetHeatmapRenderer(opacity: HeatMapOpacity, type: _heatMapColor));
       updateStaffUserCounts();
     }
 
@@ -212,9 +218,7 @@ namespace festiflo_logistics_controller
     /// <param name="propertyName">The name of the property that has changed</param>
     protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
     {
-      var propertyChangedHandler = PropertyChanged;
-      if (propertyChangedHandler != null)
-        propertyChangedHandler(this, new PropertyChangedEventArgs(propertyName));
+      PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
     public event PropertyChangedEventHandler PropertyChanged;
@@ -554,7 +558,9 @@ namespace festiflo_logistics_controller
     public async Task PollEvents()
     {
       var rreq = new RestRequest();
-      ActiveEvents = await rreq.QueryEvents();
+      var eventList = await rreq.QueryEvents();
+      if (eventList != null)
+        ActiveEvents = eventList;
     }
   }
 }
