@@ -45,39 +45,31 @@ namespace festiflo_logistics_controller
         _mapView = mapView;
         _mapView.GraphicsOverlays.Add(_clickEventOverlay);
         _mapVM = _mapView.DataContext as MapViewModel;
-
-        _mapView.GeoViewTapped += MapView_GeoViewTapped;
       }
     }
 
-    private void MapView_GeoViewTapped(object sender, GeoViewInputEventArgs e)
-    {
-      
-    }
+    //private void MapView_LeftMouseDown(object sender, MouseButtonEventArgs e)
+    //{
+    //  if (sender is MapView mapView)
+    //  {
+    //    var mousePos = e.GetPosition(mapView);
+    //    var mapRelativeLoc = mapView.ScreenToLocation(mousePos);
+    //    var markerSym = new SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Circle, System.Drawing.Color.Red, 12);
+    //    var textSym = new TextSymbol("stuff",
+    //                    System.Drawing.Color.Red,
+    //                    12,
+    //                    Esri.ArcGISRuntime.Symbology.HorizontalAlignment.Left,
+    //                    Esri.ArcGISRuntime.Symbology.VerticalAlignment.Bottom);
 
-    private void MapView_LeftMouseDown(object sender, MouseButtonEventArgs e)
-    {
-      if (sender is MapView mapView)
-      {
-        var mousePos = e.GetPosition(mapView);
-        var mapRelativeLoc = mapView.ScreenToLocation(mousePos);
-        var markerSym = new SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Circle, System.Drawing.Color.Red, 12);
-        var textSym = new TextSymbol("stuff",
-                        System.Drawing.Color.Red,
-                        12,
-                        Esri.ArcGISRuntime.Symbology.HorizontalAlignment.Left,
-                        Esri.ArcGISRuntime.Symbology.VerticalAlignment.Bottom);
-
-        var markerGraphic = new Graphic(mapRelativeLoc, markerSym);
-        var textGraphic = new Graphic(mapRelativeLoc, textSym);
-        if (_clickEventOverlay != null)
-        {
-          _clickEventOverlay.Graphics.Add(markerGraphic);
-          _clickEventOverlay.Graphics.Add(textGraphic);
-        }
-
-      }
-    }
+    //    var markerGraphic = new Graphic(mapRelativeLoc, markerSym);
+    //    var textGraphic = new Graphic(mapRelativeLoc, textSym);
+    //    if (_clickEventOverlay != null)
+    //    {
+    //      _clickEventOverlay.Graphics.Add(markerGraphic);
+    //      _clickEventOverlay.Graphics.Add(textGraphic);
+    //    }
+    //  }
+    //}
 
     // Map initialization logic is contained in MapViewModel.cs
   }

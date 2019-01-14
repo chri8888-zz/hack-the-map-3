@@ -85,7 +85,7 @@ namespace festiflo_logistics_controller
       set { geomCount = value; }
     }
 
-    private DataUtils.ColorPalletteType _heatMapColor;
+    private DataUtils.ColorPalletteType _heatMapColor = DataUtils.ColorPalletteType.Blues;
     public DataUtils.ColorPalletteType HeatMapColorPallette
     {
       get => _heatMapColor;

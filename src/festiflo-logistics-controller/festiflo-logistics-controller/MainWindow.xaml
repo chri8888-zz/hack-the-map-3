@@ -52,9 +52,9 @@
               VerticalAlignment="Stretch"
               Background="Gray" 
               ShowsPreview="True"
-              Width="5"
-              />
-      <esri:MapView Grid.Column="2" Map="{Binding Map, Source={StaticResource MapViewModel}}" />
+              Width="5" />
+      <esri:MapView x:Name="EsriMapView" 
+                    Grid.Column="2" Map="{Binding Map, Source={StaticResource MapViewModel}}" />
 
     </Grid>
     <GridSplitter Grid.Row="2"
