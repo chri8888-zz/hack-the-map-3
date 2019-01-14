@@ -2,6 +2,7 @@ package com.festiflo.festiflow_minion;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -40,10 +41,22 @@ public class MainActivity extends AppCompatActivity {
     private LocationDisplay mLocationDisplay;
     private int requestCode = 2;
 
+    private RestRequest mRester = new RestRequest();
+
     private final int mUpdateSpeed = 1000 * 5;
     private long mUpdateTimer = 0;
     private Stopwatch mGPSDelta = new Stopwatch();
     private PointCollection mPointsBuffer = new PointCollection(SpatialReferences.getWgs84());
+
+    private MyAsyncTask myAsyncTask;
+
+    private class MyAsyncTask extends AsyncTask<Integer, Integer, Integer>{
+        @Override
+        protected Integer doInBackground(Integer... inputParams) {
+            mRester.updateUserPostion(13,0,0);
+            return 0;
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +70,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 mLocationDisplay.setAutoPanMode(LocationDisplay.AutoPanMode.RECENTER);
+
+                myAsyncTask = new MyAsyncTask();
+                myAsyncTask.execute(10);
             }
         });
 
@@ -70,6 +86,7 @@ public class MainActivity extends AppCompatActivity {
         //map.setInitialViewpoint(new Viewpoint(new Point(-13176752, 4090404, SpatialReferences.getWebMercator()), 500000));
 
         // add the layers to the map
+        /*
         map.getOperationalLayers().add(new FeatureLayer(new ServiceFeatureTable(
                 getResources().getString(R.string.url_campsites))));
         map.getOperationalLayers().add(new FeatureLayer(new ServiceFeatureTable(
@@ -82,6 +99,7 @@ public class MainActivity extends AppCompatActivity {
                 getResources().getString(R.string.url_stages))));
         map.getOperationalLayers().add(new FeatureLayer(new ServiceFeatureTable(
                 getResources().getString(R.string.url_events))));
+                */
 
         mMapView.setMap(map);
 
@@ -130,14 +148,10 @@ public class MainActivity extends AppCompatActivity {
             public void onLocationChanged(LocationDisplay.LocationChangedEvent locationChangedEvent) {
 
                 // Get the current location of the gps
-                final Point gpsLocation = new Point(mLocationDisplay.getLocation()
-                        .getPosition()
-                        .getX(),
-                        mLocationDisplay.getLocation()
-                                .getPosition()
-                                .getY(),
-                        SpatialReferences.getWgs84());
-                locationUpdated(gpsLocation);
+                Point location = mLocationDisplay.getLocation().getPosition();
+
+                //final Point gpsLocation = new Point(location.getX(), location.getY(), SpatialReferences.getWgs84());
+                //locationUpdated(gpsLocation);
             }
         });
     }
@@ -172,7 +186,7 @@ public class MainActivity extends AppCompatActivity {
         if (mUpdateTimer > mUpdateSpeed) {
             mUpdateTimer -= mUpdateSpeed;
 
-            if ( mPointsBuffer.size() > 0) {
+            if (mPointsBuffer.size() > 0) {
                 Point point = processBuffer(mPointsBuffer);
                 GPSPulseEvent(point);
                 //mGPSHistory.add(point);
