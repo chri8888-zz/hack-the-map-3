@@ -212,21 +212,22 @@ if __name__ == "__main__":
   passwd = lines[1].strip()
 
   token = get_token(user, passwd, server)
-  current_users = query_users()
-  print("Queried users")
+  # current_users = query_users()
+  # print("Queried users")
 
+  # current_user_count = len(current_users)
+  # if current_user_count != USER_COUNT:
+  
+  print('Reseting users')
+  delete_users()
+  create_users()
+  current_users = query_users()
   current_user_count = len(current_users)
   if current_user_count != USER_COUNT:
-    print('Resting users')
-    delete_users()
-    create_users()
-    current_users = query_users()
-    current_user_count = len(current_users)
-    if current_user_count != USER_COUNT:
-      print("Something went wrong creating users")
-      exit()
-    else:
-      print('Updated users')
+    print("Something went wrong creating users")
+    exit()
+  else:
+    print('Updated users')
 
   # if current_user_count == 0:
   #   print('creating users please restart')
