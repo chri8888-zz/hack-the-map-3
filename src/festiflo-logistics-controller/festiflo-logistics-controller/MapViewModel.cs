@@ -16,6 +16,7 @@ using Esri.ArcGISRuntime.UI;
 using HeatMapRendererJson;
 using System.Windows.Media;
 using System.Windows.Input;
+using System.Collections.ObjectModel;
 
 namespace festiflo_logistics_controller
 {
@@ -177,6 +178,17 @@ namespace festiflo_logistics_controller
         return loadFullMapCommand;
       }
     }
+
+    private DelegateCommand moveStaffCommand;
+    public ICommand MoveStaffCommand
+    {
+      get
+      {
+        if (moveStaffCommand == null)
+          moveStaffCommand = new DelegateCommand(new Action(_stafflocationsViewModel.MoveStaff));
+        return moveStaffCommand;
+      }
+    }
     #endregion
 
 
@@ -214,16 +226,16 @@ namespace festiflo_logistics_controller
     private int totalStaff = 40;
     private int freeStaff
     {
-      get => totalStaff - (_location.Sum(location => location.CurrentStaffing));
+      get => totalStaff - (_locations.Sum(location => location.CurrentStaffing));
     }
-    private List<Location> _location = new List<Location>();
-    public List<Location> Locations { get => _location; }
+    private ObservableCollection<Location> _locations = new ObservableCollection<Location>();
+    public ObservableCollection<Location> Locations { get => _locations; }
 
     public void UpdateUserCounts(List<Esri.ArcGISRuntime.Geometry.Geometry> usersGeometries)
     {
-      foreach (var loc in _location)
+      foreach (var loc in _locations)
       {
-        loc.UserCount = DataUtils.GetContainedCount(usersGeometries, loc.Geometry, 200);
+        loc.UserCount = DataUtils.GetContainedCount(usersGeometries, loc.Geometry, 150);
       }
       OnPropertyChanged(nameof(Locations));
     }
@@ -255,11 +267,45 @@ namespace festiflo_logistics_controller
           var loc = new Location(locationType, (freeStaff > 3) ? 3 : freeStaff, 2, result.GetAttributeValue("objectid").ToString(), result.Geometry);
           loc.Name = result.GetAttributeValue("Name").ToString();
 
-          _location.Add(loc);
+          _locations.Add(loc);
         }
       }
       catch (Exception)
       {
+      }
+    }
+
+    private ObservableCollection<string> staffMoveHistory = new ObservableCollection<string>();
+
+    public ObservableCollection<string> StaffMoveHistory
+    {
+      get { return staffMoveHistory; }
+      set { staffMoveHistory = value; OnPropertyChanged(nameof(StaffMoveHistory)); }
+    }
+
+
+    public void MoveStaff()
+    {
+      FreeStaff();
+      foreach (var loc in Locations.Where(location => location.Understaffed).ToList())
+      {
+        var movingStaff = ((freeStaff > loc.StaffNeeded) ? loc.StaffNeeded : freeStaff);
+        if (movingStaff > 0)
+        {
+          StaffMoveHistory.Insert(0, loc.Name + ": " + movingStaff + " staff added.");
+          loc.CurrentStaffing += movingStaff;
+        }
+        if (freeStaff == 0 && StaffMoveHistory.Count != 0 && !StaffMoveHistory[0].Equals("No more free staff"))
+          StaffMoveHistory.Insert(0, "No more free staff");
+      }
+    }
+
+    private void FreeStaff()
+    {
+      foreach (var loc in Locations.Where(location => location.StaffNeeded < 0).ToList())
+      {
+        StaffMoveHistory.Insert(0, loc.Name + ": " + Math.Abs(loc.StaffNeeded) + " staff removed.");
+        loc.CurrentStaffing += loc.StaffNeeded;
       }
     }
 
@@ -273,13 +319,46 @@ namespace festiflo_logistics_controller
       Campsite,
     }
 
-    public class Location
+    public class Location : INotifyPropertyChanged
     {
+      /// <summary>
+      /// Raises the <see cref="MapViewModel.PropertyChanged" /> event
+      /// </summary>
+      /// <param name="propertyName">The name of the property that has changed</param>
+      protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+      {
+        var propertyChangedHandler = PropertyChanged;
+        if (propertyChangedHandler != null)
+          propertyChangedHandler(this, new PropertyChangedEventArgs(propertyName));
+      }
+      public event PropertyChangedEventHandler PropertyChanged;
+
+      public bool Understaffed { get => StaffNeeded > 0; }
+
       LocationType _locationType;
       int _currentStaffing;
-      public int CurrentStaffing { get => _currentStaffing; set => _currentStaffing = value; }
+      public int CurrentStaffing
+      {
+        get => _currentStaffing;
+        set
+        {
+          _currentStaffing = value;
+          OnPropertyChanged(nameof(CurrentStaffing));
+          OnPropertyChanged(nameof(StaffNeeded));
+          OnPropertyChanged(nameof(Understaffed));
+        }
+      }
       int _userCount;
-      public int UserCount { get => _userCount; set => _userCount = value; }
+      public int UserCount
+      { get => _userCount;
+        set
+        {
+          _userCount = value;
+          OnPropertyChanged(nameof(UserCount));
+          OnPropertyChanged(nameof(StaffNeeded));
+          OnPropertyChanged(nameof(Understaffed));
+        }
+      }
       string _oid;
       string _name;
       public string Name { get => _name; set => _name = value; }

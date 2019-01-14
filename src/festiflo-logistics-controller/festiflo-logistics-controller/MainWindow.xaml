@@ -6,7 +6,7 @@
         xmlns:esri="http://schemas.esri.com/arcgis/runtime/2013"
         xmlns:local="clr-namespace:festiflo_logistics_controller"
         mc:Ignorable="d"
-        Title="FestiFlo MS" Height="650" Width="900" Background="#fd78adff" Foreground="#4551c7ff " BorderBrush="#ffe552ff">
+        Title="FestiFlo MS" WindowState="Maximized" Height="650" Width="900" Background="#fd78adff" Foreground="#4551c7ff " BorderBrush="#ffe552ff">
   <Window.Resources>
     <local:MapViewModel x:Key="MapViewModel" />
   </Window.Resources>
@@ -25,10 +25,12 @@
       </Grid.ColumnDefinitions>
       <Grid Grid.Column="0">
         <Grid.RowDefinitions>
-          <RowDefinition/>
-          <RowDefinition/>
-          <RowDefinition/>
-          <RowDefinition/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Label Grid.Row="0" FontFamily="Tahoma" FontSize="24">
           <Label.Effect>
@@ -45,8 +47,14 @@
               Content="Refresh heat map"
               Width="120" Height="25"
               Command="{Binding ReloadHeatMapCommand, Source={StaticResource MapViewModel}}"/>
+        <Button Grid.Row="3"
+              Content="Move staff"
+              Width="120" Height="25"
+              Command="{Binding MoveStaffCommand, Source={StaticResource MapViewModel}}"/>
+        <ListBox Grid.Row="4" ItemsSource="{Binding StafflocationsViewModel.StaffMoveHistory, Source={StaticResource MapViewModel}}"/>
         <!--<TextBlock Grid.Row="2" Text="{Binding GeometryString, Source={StaticResource MapViewModel}}" TextWrapping="Wrap"/>-->
-      </Grid>
+      
+        </Grid>
       <GridSplitter Grid.Column="1"
               HorizontalAlignment="Center"
               VerticalAlignment="Stretch"
@@ -64,9 +72,27 @@
               ShowsPreview="True"
               Height="5"/>
     <Border Grid.Row="3" BorderBrush="#FF000000" BorderThickness="3" CornerRadius="8,8,8,8">
-      <DataGrid ItemsSource="{Binding StafflocationsViewModel.Locations, Source={StaticResource MapViewModel}}">
+      <DataGrid ItemsSource="{Binding StafflocationsViewModel.Locations, Source={StaticResource MapViewModel}, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" 
+                AutoGenerateColumns="False">
         <DataGrid.Columns>
+          <DataGridTextColumn Header="Location" Binding="{Binding Name}"/>
+          <DataGridTextColumn Header="Staff needed" Binding="{Binding StaffNeeded}"/>
+          <DataGridTextColumn Header="Current Staffing" Binding="{Binding CurrentStaffing}"/>
+          <DataGridTextColumn Header="Users" Binding="{Binding UserCount}"/>
         </DataGrid.Columns>
+          
+        <DataGrid.RowStyle>
+          <Style TargetType="DataGridRow">
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding Understaffed, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" Value="true">
+                <Setter Property="Background" Value="#fd78ad"></Setter>
+              </DataTrigger>
+              <DataTrigger Binding="{Binding Understaffed, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}" Value="false">
+                <Setter Property="Background" Value="#2ed3cc"></Setter>
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </DataGrid.RowStyle>
       </DataGrid>
     </Border>
 
