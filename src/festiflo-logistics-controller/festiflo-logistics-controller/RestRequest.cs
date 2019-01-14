@@ -222,7 +222,7 @@ namespace festiflo_logistics_controller
       return tokenResult.GetValue("token")?.ToString();
     }
 
-    public async Task<List<StaffMember>> GetStaff()
+    public async Task<List<StaffMember>> GetStaff(string whereClause = "")
     {
       var staffList = new List<StaffMember>();
 
@@ -230,11 +230,14 @@ namespace festiflo_logistics_controller
       if (string.IsNullOrEmpty(token))
         return staffList;
 
+      if (string.IsNullOrEmpty(whereClause))
+        whereClause = "oid > 0";
+
       var postParams = new Dictionary<string, string>()
       {
         { "token", token },
         { "f", "pjson" },
-        { "where", "oid > 0" },
+        { "where", whereClause },
         { "outfields", "*" },
       };
 
@@ -267,10 +270,10 @@ namespace festiflo_logistics_controller
       return staffList;
     }
 
-    public async Task CreateStaffMembers(List<StaffMember> members)
+    public async Task<bool> CreateStaffMembers(List<StaffMember> members)
     {
       if (members == null)
-        return;
+        return false;
 
       StringBuilder sb = new StringBuilder();
       sb.Append("[");
@@ -280,7 +283,7 @@ namespace festiflo_logistics_controller
 
       var token = await GetToken();
       if (string.IsNullOrEmpty(token))
-        return;
+        return false;
 
       var postParams = new Dictionary<string, string>()
       {
@@ -290,19 +293,58 @@ namespace festiflo_logistics_controller
       };
 
       var content = new FormUrlEncodedContent(postParams);
-      await httpClient.PostAsync(_cardiffServer + _staffLayer + "addFeatures", content);
+      var response = await httpClient.PostAsync(_cardiffServer + _staffLayer + "addFeatures", content);
+      return response.StatusCode == System.Net.HttpStatusCode.OK;
     }
 
-    public async Task CreateEvent(EventData eventData)
+    public async Task<bool> UpdateStaffMember(StaffMember member)
+    {
+      if (member == null)
+        return false;
+
+      string whereClause = "id = " + member.ID;
+      var members = await GetStaff(whereClause);
+      if (members == null || members.Count < 1)
+        return false;
+
+      // The OIDs are only unqiue. We query from the database to ensure it's correct.
+      var updatedMember = members[0];
+      updatedMember.Name = member.Name;
+      updatedMember.Location = member.Location;
+      updatedMember.X = member.X;
+      updatedMember.Y = member.Y;
+
+      StringBuilder sb = new StringBuilder();
+      sb.Append("[");
+      sb.Append(updatedMember.ToJSON());
+      sb.Append("]");
+
+      var token = await GetToken();
+      if (string.IsNullOrEmpty(token))
+        return false;
+
+      var postParams = new Dictionary<string, string>()
+      {
+        { "token", token },
+        { "f", "pjson" },
+        { "updates", sb.ToString() }
+      };
+
+      var content = new FormUrlEncodedContent(postParams);
+      var response = await httpClient.PostAsync(_cardiffServer + _staffLayer + "applyEdits", content);
+      return response.StatusCode == System.Net.HttpStatusCode.OK;
+    }
+
+    public async Task<bool> CreateEvent(EventData eventData)
     {
       if (eventData == null)
-        return;
+        return false;
 
       string eventJson = "[" + eventData.ToJSON() + "]";
 
       var token = await GetToken();
       if (string.IsNullOrEmpty(token))
-        return;
+        return false;
 
       var postParams = new Dictionary<string, string>()
       {
@@ -312,20 +354,21 @@ namespace festiflo_logistics_controller
       };
 
       var content = new FormUrlEncodedContent(postParams);
-      await httpClient.PostAsync(_cardiffServer + _eventLayer + "addFeatures", content);
+      var response = await httpClient.PostAsync(_cardiffServer + _eventLayer + "addFeatures", content);
+      return response.StatusCode == System.Net.HttpStatusCode.OK;
     }
 
-    public async Task DeleteEvent(int eventID)
+    public async Task<bool> DeleteEvent(int eventID)
     {
       var events = await QueryEvents("id = " + eventID);
       if (events == null || events.Count < 1)
-        return;
+        return false;
 
       int objectID = events.FirstOrDefault().OID;
 
       var token = await GetToken();
       if (string.IsNullOrEmpty(token))
-        return;
+        return false;
 
       var postParams = new Dictionary<string, string>()
       {
@@ -335,7 +378,8 @@ namespace festiflo_logistics_controller
       };
 
       var content = new FormUrlEncodedContent(postParams);
-      await httpClient.PostAsync(_cardiffServer + _eventLayer + "deleteFeatures", content);
+      var response = await httpClient.PostAsync(_cardiffServer + _eventLayer + "deleteFeatures", content);
+      return response.StatusCode == System.Net.HttpStatusCode.OK;
     }
 
     public async Task<List<EventData>> QueryEvents(string whereClause = "")
