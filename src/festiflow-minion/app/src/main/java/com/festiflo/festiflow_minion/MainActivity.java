@@ -53,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Set initial location
         ArcGISMap map = new ArcGISMap(SpatialReferences.getWebMercator());
-        map.setBasemap(Basemap.createTopographic());
+        map.setBasemap(Basemap.createImageryWithLabels());
         //Point glasto_location = new Point(-290580.7608083967, 6649146.157472552, SpatialReferences.getWebMercator());
         //map.setInitialViewpoint(new Viewpoint(glasto_location, 20000));
         //map.setInitialViewpoint(new Viewpoint(new Point(-13176752, 4090404, SpatialReferences.getWebMercator()), 500000));
