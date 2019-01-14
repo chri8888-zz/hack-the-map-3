@@ -273,6 +273,8 @@ namespace festiflo_logistics_controller
           mapVM.HeatMapColorPallette = DataUtils.ColorPalletteType.Heat;
         else if (color == "Blues")
           mapVM.HeatMapColorPallette = DataUtils.ColorPalletteType.Blues;
+        else if (color == "Vivid")
+          mapVM.HeatMapColorPallette = DataUtils.ColorPalletteType.Vivid;
       }
     }
 
