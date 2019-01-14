@@ -6,7 +6,8 @@
         xmlns:esri="http://schemas.esri.com/arcgis/runtime/2013"
         xmlns:local="clr-namespace:festiflo_logistics_controller"
         mc:Ignorable="d"
-        Title="FestiFlo MS" Height="650" Width="900" Background="#fd78adff" Foreground="#4551c7ff " BorderBrush="#ffe552ff"
+        Title="FestiFlo MS" Height="650" Width="900" 
+        Background="#4551c7" Foreground="#4551c7" BorderBrush="#ffe552ff"
         PreviewMouseMove="Window_PreviewMouseMove">
   <Window.Resources>
     <local:MapViewModel x:Key="MapViewModel" />
@@ -32,24 +33,25 @@
           <RowDefinition Height="Auto"/>
           <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <Label Grid.Row="0" FontFamily="Tahoma" FontSize="24">
-          <Label.Effect>
-            <DropShadowEffect BlurRadius="10" ShadowDepth="0" Opacity="1" Color="White"/>
-          </Label.Effect>
-          <Label.Content>FestiFlo</Label.Content>
-        </Label>
+        <Image x:Name="LogoImage" Grid.Row="0" Margin="0, 10,0,0"/>
         <!-- -->
 
         <Border  x:Name="_border" Visibility="Collapsed"
                  DataContext="{StaticResource MapViewModel}"/>
-        <Border Grid.Row="1" Margin="6, 3, 6, 3" Width="Auto" Height="Auto">
+        <Border HorizontalAlignment="Left" Grid.Row="1" Margin="40, 3, 6, 3" Width="Auto" Height="Auto">
           <StackPanel Orientation="Vertical" Height="Auto">
-            <TextBlock Text="Event Title" Width="Auto" Foreground="Black" HorizontalAlignment="Left"/>
+            <TextBlock Text="Event Type" FontSize="14"  Width="Auto" Foreground="Black" HorizontalAlignment="Left"/>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+              <RadioButton x:Name="RadioButtonInfo" IsChecked="True" Background="LightBlue" Content="Information" Click="RadioButtonInfo_Click"/>
+              <RadioButton x:Name="RadioButtonWarning" Background="Gold" Content="Warning" Margin="6,0,0,0" Click="RadioButtonWarning_Click"/>
+              <RadioButton x:Name="RadioButtonClosure" Background="Red" Content="Closure" Margin="6,0,0,0" Click="RadioButtonClosure_Click"/>
+            </StackPanel>
+            <TextBlock Text="Event Title" FontSize="14" Width="Auto" Foreground="Black" HorizontalAlignment="Left"/>
             <TextBox x:Name="TitleField" MinWidth="100" MaxWidth="200" HorizontalAlignment="Left"
                      Text="{Binding EventManagerViewModel.EventTitle, Source={StaticResource MapViewModel}}"/>
-            
-            <TextBlock Margin="0,6,0,0" Text="Event Description" Foreground="Black" 
-                       Height="Auto"  MaxWidth="100" HorizontalAlignment="Left"/>
+
+            <TextBlock Margin="0,6,0,0" FontSize="14" Text="Event Description" Foreground="Black" 
+                       Height="Auto" HorizontalAlignment="Left"/>
             <TextBox x:Name="DescField" MinHeight="200" Height="Auto" TextWrapping="Wrap"
                      Text="{Binding EventManagerViewModel.EventDescription, Source={StaticResource MapViewModel}}"/>
             
@@ -68,10 +70,21 @@
               Content="Load data"
               Width="120" Height="25"
               Command="{Binding LoadFullMapCommand, Source={StaticResource MapViewModel}}"/>
-        <Button Grid.Row="4"
-              Content="Refresh heat map"
-              Width="120" Height="25"
-              Command="{Binding ReloadHeatMapCommand, Source={StaticResource MapViewModel}}"/>
+        <StackPanel Orientation="Horizontal" Grid.Row="4">
+          <Button Content="Refresh heat map"
+                Width="120" Height="25"
+                Command="{Binding ReloadHeatMapCommand, Source={StaticResource MapViewModel}}"/>
+          <StackPanel Grid.Row="5" Orientation="Horizontal" >
+            <TextBlock Text="Heatmap Color" />
+            <ComboBox x:Name="HeatMapColor"
+                Width="120" Height="25"
+                SelectionChanged="ComboBox_SelectionChanged">
+              <ComboBoxItem IsSelected="True" Name="Heat">Heat</ComboBoxItem>
+              <ComboBoxItem Name="Blues">Blues</ComboBoxItem>
+            </ComboBox>
+          </StackPanel>
+        </StackPanel>
+
         <!--<TextBlock Grid.Row="2" Text="{Binding GeometryString, Source={StaticResource MapViewModel}}" TextWrapping="Wrap"/>-->
       </Grid>
       <GridSplitter Grid.Column="1"

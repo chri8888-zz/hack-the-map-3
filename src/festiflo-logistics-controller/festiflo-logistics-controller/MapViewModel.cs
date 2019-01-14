@@ -268,8 +268,6 @@ namespace festiflo_logistics_controller
       }
     }
 
-
-
     public enum LocationType
     {
       Stage,

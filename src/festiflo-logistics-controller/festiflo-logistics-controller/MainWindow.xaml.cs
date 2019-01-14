@@ -38,7 +38,7 @@ namespace festiflo_logistics_controller
       new SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Circle, System.Drawing.Color.LightBlue, 12);
 
     private SimpleMarkerSymbol _warningSymbol =
-      new SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Triangle, System.Drawing.Color.Yellow, 12);
+      new SimpleMarkerSymbol(SimpleMarkerSymbolStyle.Triangle, System.Drawing.Color.Gold, 12);
 
     private SimpleMarkerSymbol _closureSymbol =
       new SimpleMarkerSymbol(SimpleMarkerSymbolStyle.X, System.Drawing.Color.Red, 12);
@@ -47,6 +47,9 @@ namespace festiflo_logistics_controller
     {
       InitializeComponent();
       Loaded += OnLoaded;
+
+      var dir = System.AppDomain.CurrentDomain.BaseDirectory + "..\\..\\img\\widelogosmall.png";
+      LogoImage.Source = new BitmapImage(new Uri(dir));
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
@@ -197,6 +200,46 @@ namespace festiflo_logistics_controller
         }
 
         _eventPlacementMode = false;
+      }
+    }
+
+    private void RadioButtonInfo_Click(object sender, RoutedEventArgs e)
+    {
+      // remove other radio button 
+      if (_border.DataContext is MapViewModel mapVM && mapVM.EventManagerViewModel != null)
+        mapVM.EventManagerViewModel.SelectedEventType = EventsManagerViewModel.EventType.Information;
+
+      RadioButtonWarning.IsChecked = false;
+      RadioButtonClosure.IsChecked = false;
+    }
+
+    private void RadioButtonWarning_Click(object sender, RoutedEventArgs e)
+    {
+      if (_border.DataContext is MapViewModel mapVM && mapVM.EventManagerViewModel != null)
+        mapVM.EventManagerViewModel.SelectedEventType = EventsManagerViewModel.EventType.Warning;
+
+      RadioButtonInfo.IsChecked = false;
+      RadioButtonClosure.IsChecked = false;
+    }
+
+    private void RadioButtonClosure_Click(object sender, RoutedEventArgs e)
+    {
+      if (_border.DataContext is MapViewModel mapVM && mapVM.EventManagerViewModel != null)
+        mapVM.EventManagerViewModel.SelectedEventType = EventsManagerViewModel.EventType.Closure;
+
+      RadioButtonWarning.IsChecked = false;
+      RadioButtonInfo.IsChecked = false;
+    }
+
+    private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+      if (_border.DataContext is MapViewModel mapVM)
+      {
+        string color = (HeatMapColor.SelectedItem as ComboBoxItem).Name;
+        if (color == "Heat")
+          mapVM.HeatMapColorPallette = DataUtils.ColorPalletteType.Heat;
+        else if (color == "Blues")
+          mapVM.HeatMapColorPallette = DataUtils.ColorPalletteType.Blues;
       }
     }
 
