@@ -42,20 +42,20 @@
         </DataGrid>
       </Border>
       <Grid DockPanel.Dock="Bottom">
-        <Grid.ColumnDefinitions>
-          <ColumnDefinition Width="400"/>
-          <ColumnDefinition Width="Auto" />
-          <ColumnDefinition/>
-        </Grid.ColumnDefinitions>
-        <Grid Grid.Column="0">
-          <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-          </Grid.RowDefinitions>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="400"/>
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition/>
+      </Grid.ColumnDefinitions>
+      <Grid Grid.Column="0">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
           <Image x:Name="LogoImage" Grid.Row="0" Margin="0, 10,0,0"/>
           <!-- -->
 
@@ -104,8 +104,8 @@
               </ComboBox>
               <CheckBox Margin="10" 
                   IsChecked="{Binding AutoRefresh, Source={StaticResource MapViewModel}, Mode=TwoWay}" >
-                Auto refresh
-              </CheckBox>
+          Auto refresh
+        </CheckBox>
             </StackPanel>
           </StackPanel>
 
@@ -117,22 +117,22 @@
               Content="Move staff"
               Width="120" Height="25"
               Command="{Binding MoveStaffCommand, Source={StaticResource MapViewModel}}"/>
-          <ListBox Grid.Row="5" ItemsSource="{Binding StafflocationsViewModel.StaffMoveHistory, Source={StaticResource MapViewModel}}" Height="150"/>
-          <!--<TextBlock Grid.Row="2" Text="{Binding GeometryString, Source={StaticResource MapViewModel}}" TextWrapping="Wrap"/>-->
-
+        <ListBox Grid.Row="5" ItemsSource="{Binding StafflocationsViewModel.StaffMoveHistory, Source={StaticResource MapViewModel}}" Height="150"/>
+        <!--<TextBlock Grid.Row="2" Text="{Binding GeometryString, Source={StaticResource MapViewModel}}" TextWrapping="Wrap"/>-->
+      
         </Grid>
-        <GridSplitter Grid.Column="1"
+      <GridSplitter Grid.Column="1"
               HorizontalAlignment="Center"
               VerticalAlignment="Stretch"
               Background="Gray" 
               ShowsPreview="True"
               Width="5" />
-        <esri:MapView x:Name="EsriMapView" 
+      <esri:MapView x:Name="EsriMapView"
                     MouseLeftButtonDown="MapView_LeftMouseDown"
                     Grid.Column="2" Map="{Binding Map, Source={StaticResource MapViewModel}}" />
 
-      </Grid>
-
+    </Grid>
+          
     </DockPanel>
 
   </Grid>

@@ -227,10 +227,18 @@ namespace festiflo_logistics_controller
     private int totalStaff = 45;
     private int freeStaff
     {
-      get => totalStaff - (_locations.Sum(location => location.CurrentStaffing));
+      get => _locations.Where(location => location.LocationType == LocationType.StaffRoom).Sum(location => location.CurrentStaffing);
     }
+
+    private int workingStaffCount
+    {
+      get => (_locations.Sum(location => location.CurrentStaffing));
+    }
+
     private ObservableCollection<Location> _locations = new ObservableCollection<Location>();
     public ObservableCollection<Location> Locations { get => _locations; }
+
+    private ObservableCollection<StaffMember> _staffMembers = new ObservableCollection<StaffMember>();
 
     public void UpdateUserCounts(List<Esri.ArcGISRuntime.Geometry.Geometry> usersGeometries)
     {
@@ -246,6 +254,7 @@ namespace festiflo_logistics_controller
     {
       ExtractInformation(_stagesURL, "objectid >= 0", LocationType.Stage);
       ExtractInformation(_entrancesURL, "objectid >= 0", LocationType.Entrance);
+      GetFreeStaff();
     }
 
     private async void ExtractInformation(string url, string whereClause, LocationType locationType)
@@ -262,7 +271,7 @@ namespace festiflo_logistics_controller
 
         foreach (var result in queryFeatureResults)
         {
-          var loc = new Location(locationType, (freeStaff > 3) ? 3 : freeStaff, 2, result.GetAttributeValue("objectid").ToString(), result.Geometry);
+          var loc = new Location(locationType, 0, 2, result.GetAttributeValue("objectid").ToString(), result.Geometry);
           loc.Name = result.GetAttributeValue("Name").ToString();
 
           _locations.Add(loc);
@@ -271,6 +280,15 @@ namespace festiflo_logistics_controller
       catch (Exception)
       {
       }
+    }
+
+    private void GetFreeStaff()
+    {
+      var geom = new Esri.ArcGISRuntime.Geometry.MapPoint(0, 0, SpatialReferences.WebMercator);
+      var loc = new Location(LocationType.StaffRoom, totalStaff - workingStaffCount, 0, "n/a", geom);
+      loc.Name = "Staff Room";
+
+      _locations.Add(loc);
     }
 
     private ObservableCollection<string> staffMoveHistory = new ObservableCollection<string>();
@@ -284,14 +302,16 @@ namespace festiflo_logistics_controller
 
     public void MoveStaff()
     {
-      FreeStaff();
+      var staffRoom = Locations.Where(location => location.LocationType == LocationType.StaffRoom).FirstOrDefault();
+
       foreach (var loc in Locations.Where(location => location.Understaffed).ToList().OrderBy(loc => loc.StaffNeeded / (loc.CurrentStaffing == 0 ? 0.00001 : loc.CurrentStaffing)))
       {
         var movingStaff = ((freeStaff > loc.StaffNeeded) ? loc.StaffNeeded : freeStaff);
         if (movingStaff > 0)
         {
-          StaffMoveHistory.Insert(0, DateTime.Now + " - " + loc.Name + ": " + movingStaff + " staff added.");
+          StaffMoveHistory.Insert(0, DateTime.Now + " - " + loc.Name + ": " + movingStaff + " staff from staff room.");
           loc.CurrentStaffing += movingStaff;
+          staffRoom.CurrentStaffing -= movingStaff;
         }
         else if (loc.CurrentStaffing == 0)
         {
@@ -311,8 +331,10 @@ namespace festiflo_logistics_controller
     {
       foreach (var loc in Locations.Where(location => location.StaffNeeded < 0).ToList())
       {
-        StaffMoveHistory.Insert(0, DateTime.Now + " - " + loc.Name + ": " + Math.Abs(loc.StaffNeeded) + " staff removed.");
+        StaffMoveHistory.Insert(0, DateTime.Now + " - " + loc.Name + ": " + Math.Abs(loc.StaffNeeded) + " staff now on break.");
         loc.CurrentStaffing += loc.StaffNeeded;
+        var staffRoom = Locations.Where(location => location.LocationType == LocationType.StaffRoom).FirstOrDefault();
+        staffRoom.CurrentStaffing -= loc.StaffNeeded;
       }
     }
 
@@ -324,6 +346,7 @@ namespace festiflo_logistics_controller
       Carpark,
       Entrance,
       Campsite,
+      StaffRoom,
     }
 
     public class Location : INotifyPropertyChanged
@@ -343,7 +366,14 @@ namespace festiflo_logistics_controller
       public bool Understaffed { get => StaffNeeded > 0; }
       public bool UrgentStaffRequired { get => StaffNeeded > 0 && CurrentStaffing < 1; }
 
-      LocationType _locationType;
+      private LocationType _locationType;
+
+      public LocationType LocationType
+      {
+        get { return _locationType; }
+        set { _locationType = value; }
+      }
+
       int _currentStaffing;
       public int CurrentStaffing
       {
@@ -358,7 +388,7 @@ namespace festiflo_logistics_controller
           OnPropertyChanged(nameof(Understaffed));
         }
       }
-      int _userCount;
+      int _userCount = 0;
       public int UserCount
       {
         get => _userCount;
@@ -377,7 +407,7 @@ namespace festiflo_logistics_controller
       Esri.ArcGISRuntime.Geometry.Geometry _geometry;
       public Esri.ArcGISRuntime.Geometry.Geometry Geometry { get => _geometry; set => _geometry = value; }
 
-      public int StaffNeeded { get => (int)Math.Ceiling((_userCount / GetUserStaffRatio()) - _currentStaffing); }
+      public int StaffNeeded { get => _locationType == LocationType.StaffRoom? 0 : (int)Math.Ceiling((_userCount / GetUserStaffRatio()) - _currentStaffing); }
       public Location(LocationType locationType, int currentStaffing, int userCount, string oid, Esri.ArcGISRuntime.Geometry.Geometry geometry)
       {
         _locationType = locationType;
