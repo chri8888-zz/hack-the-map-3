@@ -11,6 +11,15 @@ using Newtonsoft.Json;
 
 namespace festiflo_logistics_controller
 {
+
+  // ToDo: Delete when merged
+  public enum EventType
+  {
+    Information = 0,
+    Warning = 1,
+    Closure = 2
+  }
+
   internal class StaffMember
   {
     public int OID { get; private set; }
@@ -46,8 +55,6 @@ namespace festiflo_logistics_controller
         return null;
 
       StafflocationsViewModel.LocationType location = (StafflocationsViewModel.LocationType)locationInt;
-
-      var staffMember = new StaffMember();
 
       var geometry = json.GetValue("geometry") as JObject;
       if (geometry == null)
@@ -106,7 +113,7 @@ namespace festiflo_logistics_controller
     public string Description { get; set; }
     public double X { get; set; }
     public double Y { get; set; }
-
+    public EventType EventType {get; set; }
     public static EventData fromJSON(JObject json)
     {
       if (json == null)
@@ -127,7 +134,14 @@ namespace festiflo_logistics_controller
 
       string description = (string)attributes.GetValue("description");
 
-      var staffMember = new EventData();
+      int? eventTypeInt = (int?)attributes.GetValue("eventtype");
+      if (eventTypeInt == null)
+        return null;
+
+      if (eventTypeInt < 0 || eventTypeInt > Enum.GetValues(typeof(EventType)).Cast<int>().Max())
+        return null;
+
+      var eventType = (EventType)eventTypeInt.Value;
 
       var geometry = json.GetValue("geometry") as JObject;
       if (geometry == null)
@@ -147,6 +161,7 @@ namespace festiflo_logistics_controller
         ID = id.Value,
         Name = name,
         Description = description,
+        EventType = eventType,
         X = x.Value,
         Y = y.Value,
       };
@@ -162,7 +177,8 @@ namespace festiflo_logistics_controller
             { "oid", OID },
             { "id", ID },
             { "name", Name },
-            { "description", Description }
+            { "description", Description },
+            { "eventtype", (int) EventType },
           }
         },
         {
@@ -182,7 +198,7 @@ namespace festiflo_logistics_controller
   {
     private static string _cardiffServer = "https://cardiffportal.esri.com";
     private static string _staffLayer = "/server/rest/services/Hosted/StaffServiceWebMercator/FeatureServer/0/";
-    private static string _eventLayer = "/server/rest/services/Hosted/EventServiceWebMercator/FeatureServer/0/";
+    private static string _eventLayer = "/server/rest/services/Hosted/EventServiceEventType/FeatureServer/0/";
 
     private HttpClient httpClient = null;
 
