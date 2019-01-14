@@ -57,6 +57,22 @@ namespace festiflo_logistics_controller
       return _operationalLayer;
     }
 
+    public static async Task<ArcGISVectorTiledLayer> GetVectorTileLayer(string url)
+    {
+      ArcGISVectorTiledLayer _vectorTiledLayer = null;
+      try
+      {
+        _vectorTiledLayer = new ArcGISVectorTiledLayer(new Uri(url));
+        await _vectorTiledLayer.LoadAsync();
+      }
+      catch (Exception)
+      {
+      }
+
+      return _vectorTiledLayer;
+    }
+
+
     public static Renderer GetHeatmapRenderer(long blurRadius = 14, long minPixelIntensity = 0, long maxPixelIntensity = 100, IList<(double ratio, Color color)> colorStops = null)
     {
       // Create a new HeatMapRenderer with info provided by the user.

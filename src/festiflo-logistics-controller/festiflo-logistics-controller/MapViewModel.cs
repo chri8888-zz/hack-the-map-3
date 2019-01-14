@@ -24,7 +24,7 @@ namespace festiflo_logistics_controller
   /// </summary>
   public class MapViewModel : INotifyPropertyChanged
   {
-    private static string _userDataUrl = "https://cardiffportal.esri.com/server/rest/services/Hosted/FestiFeatureService/FeatureServer/0";// "http://cardiffportal.esri.com/server/rest/services/Hosted/FestivalTestPolys/FeatureServer/0";
+    private static string _userDataUrl = "https://cardiffportal.esri.com/server/rest/services/Hosted/FestiFlowUserService/FeatureServer/0";// "https://cardiffportal.esri.com/server/rest/services/Hosted/UserServiceWebMercator/FeatureServer/0";//"https://cardiffportal.esri.com/server/rest/services/Hosted/FestiFeatureService/FeatureServer/0";// "http://cardiffportal.esri.com/server/rest/services/Hosted/FestivalTestPolys/FeatureServer/0";
     //    private static string _userDataUrl = "http://cardiffportal.esri.com/server/rest/services/Hosted/FestivalTestPolys/FeatureServer/0";
     private static string _stagesURL = "http://cardiffportal.esri.com/server/rest/services/Hosted/Stages_WebMercator/FeatureServer/3";// "http://cardiffportal.esri.com/server/rest/services/Hosted/Stages/FeatureServer/3";
     private static string _toiletsURL = "http://cardiffportal.esri.com/server/rest/services/Hosted/ToiletsWGS/FeatureServer/0";
@@ -40,6 +40,7 @@ namespace festiflo_logistics_controller
     public MapViewModel()
     {
       LoadHeatMap();
+      updateStaffUserCounts();
     }
 
     private Map _map = new Map(BasemapType.ImageryWithLabelsVector, 51.155, -2.585, 14);
@@ -113,6 +114,9 @@ namespace festiflo_logistics_controller
       await DataUtils.AddOperationalLayerAsync(_map, _toiletsURL);
       await DataUtils.AddOperationalLayerAsync(_map, _entrancesURL);
       await DataUtils.AddOperationalLayerAsync(_map, _stagesURL);
+
+      var vectorLayer = await DataUtils.GetVectorTileLayer("https://tiles.arcgis.com/tiles/cjTkfDK7oY4dk5Cd/arcgis/rest/services/Glasto/VectorTileServer");
+      _map.OperationalLayers.Add(vectorLayer);
 
       JohnPeelGeometry = await DataUtils.GetGeometry(_stagesURL);
 
@@ -199,7 +203,7 @@ namespace festiflo_logistics_controller
     private static string _entrancesURL = "http://cardiffportal.esri.com/server/rest/services/Hosted/EntrancesStar/FeatureServer/1"; // "http://cardiffportal.esri.com/server/rest/services/Hosted/Entrances/FeatureServer/1";
     private static string _campsitesURL = "http://cardiffportal.esri.com/server/rest/services/Hosted/Campsites/FeatureServer/3";
 
-    private int totalStaff = 80;
+    private int totalStaff = 40;
     private int freeStaff
     {
       get => totalStaff - (_location.Sum(location => location.CurrentStaffing));
@@ -240,7 +244,7 @@ namespace festiflo_logistics_controller
 
         foreach (var result in queryFeatureResults)
         {
-          var loc = new Location(locationType, (freeStaff > 5) ? 5 : freeStaff, 2, result.GetAttributeValue("objectid").ToString(), result.Geometry);
+          var loc = new Location(locationType, (freeStaff > 3) ? 3 : freeStaff, 2, result.GetAttributeValue("objectid").ToString(), result.Geometry);
           loc.Name = result.GetAttributeValue("Name").ToString();
 
           _location.Add(loc);
@@ -290,13 +294,13 @@ namespace festiflo_logistics_controller
         switch (_locationType)
         {
           case LocationType.Stage:
-            return 500;
+            return 30;
           case LocationType.Carpark:
-            return 1000;
-          case LocationType.Entrance:
             return 50;
+          case LocationType.Entrance:
+            return 15;
           case LocationType.Campsite:
-            return 3000;
+            return 100;
           default:
             return 0;
         }
