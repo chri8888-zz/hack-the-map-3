@@ -3,8 +3,10 @@
     <string name="action_settings">Settings</string>
 
     <string name="url_toilets">http://cardiffportal.esri.com/server/rest/services/Hosted/ToiletsWGS/FeatureServer/0</string>
-    <string name="url_stages">http://cardiffportal.esri.com/server/rest/services/Hosted/Stages_WebMercator/FeatureServer/3</string>
+    <string name="url_stages">https://services2.arcgis.com/cjTkfDK7oY4dk5Cd/arcgis/rest/services/Stages/FeatureServer/6</string>
     <string name="url_carparks">http://cardiffportal.esri.com/server/rest/services/Hosted/CarParks/FeatureServer/5</string>
     <string name="url_entrances">http://cardiffportal.esri.com/server/rest/services/Hosted/EntrancesStar/FeatureServer/1</string>
     <string name="url_campsites">http://cardiffportal.esri.com/server/rest/services/Hosted/Campsites/FeatureServer/3</string>
+    <string name="url_events">https://cardiffportal.esri.com/server/rest/services/Hosted/EventServiceWebMercator/FeatureServer/0</string>
+    <string name="url_users">https://cardiffportal.esri.com/server/rest/services/Hosted/FestiFlowUserService/FeatureServer/0</string>
 </resources>
